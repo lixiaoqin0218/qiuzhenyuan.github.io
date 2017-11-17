@@ -80,7 +80,7 @@
 <meta property="og:image" content="http://img.blog.csdn.net/20170226181654026?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luYXRfMzM5OTQ3NDQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
 <meta property="og:image" content="http://img.blog.csdn.net/20170226181830042?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luYXRfMzM5OTQ3NDQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
 <meta property="og:image" content="http://img.blog.csdn.net/20170226182415082?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luYXRfMzM5OTQ3NDQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
-<meta property="og:updated_time" content="2017-09-18T10:43:01.930Z">
+<meta property="og:updated_time" content="2017-11-17T11:27:01.568Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="PHP中的类型转换">
 <meta name="twitter:description" content="类型转换，是指变量从一种数据类型转变成另一种数据类型，类型转换的方法有两种，一种是自动转换，另一种是强制转换。">
@@ -334,31 +334,10 @@
 <p>类型转换，是指变量从一种数据类型转变成另一种数据类型，类型转换的方法有两种，一种是自动转换，另一种是强制转换。</p>
 </blockquote>
 <a id="more"></a>
-<h2 id="自动类型转换的判别"><a href="#自动类型转换的判别" class="headerlink" title="自动类型转换的判别"></a>自动类型转换的判别</h2><p>PHP 在变量定义中不需要（或不支持）明确的类型定义；变量类型是根据使用该变量的上下文所决定的。也就是说，如果把一个 string 值赋给变量 $var，$var 就成了一个 string。如果又把一个integer 赋给 $var，那它就成了一个integer。  </p>
-<pre><code>&lt;?php
-    $var=123;
-    var_dump($var);
-    $var=&apos;hi&apos;;
-    var_dump($var);
-    $var=true;
-    var_dump($var);
-?&gt; 
-</code></pre><p><strong>输出结果如下：</strong><br><img src="http://img.blog.csdn.net/20170226181551803?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luYXRfMzM5OTQ3NDQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
-<p>PHP 的自动类型转换的一个例子是加法运算符”+”。如果任何一个操作数是float，则所有的操作数都被当成float，结果也是float。否则操作数会被解释为integer，结果也是integer。注意这并没有改变这些操作数本身的类型；改变的仅是这些操作数如何被求值以及表达式本身的类型。  </p>
-<pre><code>&lt;?php
-    //运算自动转换
-    $foo = &quot;0&quot;;  // $foo 是字符串 (ASCII 48)
-    var_dump($foo);
-    $foo += 2;   // $foo 现在是一个整数 (2)
-    var_dump($foo);
-    $foo = $foo + 1.3;  // $foo 现在是一个浮点数 (3.3)
-    var_dump($foo);
-    $foo=1;
-    $bar=$foo+1.22;     //$foo还是一个整形，$bar是浮点数
-    var_dump($foo);
-    var_dump($bar);
-?&gt;
-</code></pre><p><strong>运行结果如下：</strong><br><img src="http://img.blog.csdn.net/20170226181654026?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luYXRfMzM5OTQ3NDQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<h2 id="自动类型转换的判别"><a href="#自动类型转换的判别" class="headerlink" title="自动类型转换的判别"></a>自动类型转换的判别</h2><p>PHP 在变量定义中不需要（或不支持）明确的类型定义；变量类型是根据使用该变量的上下文所决定的。也就是说，如果把一个 string 值赋给变量 $var，$var 就成了一个 string。如果又把一个integer 赋给 $var，那它就成了一个integer。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">    $var=123;</div><div class="line">    var_dump($var);</div><div class="line">    $var=&apos;hi&apos;;</div><div class="line">    var_dump($var);</div><div class="line">    $var=true;</div><div class="line">    var_dump($var);</div><div class="line">?&gt;</div></pre></td></tr></table></figure></p>
+<p><strong>输出结果如下：</strong><br><img src="http://img.blog.csdn.net/20170226181551803?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luYXRfMzM5OTQ3NDQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>PHP 的自动类型转换的一个例子是加法运算符”+”。如果任何一个操作数是float，则所有的操作数都被当成float，结果也是float。否则操作数会被解释为integer，结果也是integer。注意这并没有改变这些操作数本身的类型；改变的仅是这些操作数如何被求值以及表达式本身的类型。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">    //运算自动转换</div><div class="line">    $foo = &quot;0&quot;;  // $foo 是字符串 (ASCII 48)</div><div class="line">    var_dump($foo);</div><div class="line">    $foo += 2;   // $foo 现在是一个整数 (2)</div><div class="line">    var_dump($foo);</div><div class="line">    $foo = $foo + 1.3;  // $foo 现在是一个浮点数 (3.3)</div><div class="line">    var_dump($foo);</div><div class="line">    $foo=1;</div><div class="line">    $bar=$foo+1.22;     //$foo还是一个整形，$bar是浮点数</div><div class="line">    var_dump($foo);</div><div class="line">    var_dump($bar);</div><div class="line">?&gt;</div></pre></td></tr></table></figure></p>
+<p><strong>运行结果如下：</strong><br><img src="http://img.blog.csdn.net/20170226181654026?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luYXRfMzM5OTQ3NDQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
 <h2 id="强制转换"><a href="#强制转换" class="headerlink" title="强制转换"></a>强制转换</h2><p>PHP 中的类型强制转换和 C 中的非常像：在要转换的变量之前加上用括号括起来的目标类型。<br>允许的强制转换有： </p>
 <ul>
 <li>(int), (integer) - 转换为整形 integer </li>
@@ -382,98 +361,29 @@
 <li>不包括任何成员变量的对象（仅 PHP 4.0 适用）  </li>
 <li>从空标记生成的 SimpleXML 对象  </li>
 </ul>
-<p><strong>所有其它值都被认为是 TRUE（包括任何资源）。</strong><br>测试程序如下：</p>
-<pre><code>&lt;?php
-    $arr=array();
-    if(0){
-        echo &apos;0 is true &lt;/br&gt;&apos;;
-    }else{
-        echo &apos;0 is false &lt;/br&gt;&apos;;
-    }
-    if(0.0){
-        echo &apos;0.0 is true &lt;/br&gt;&apos;;
-    }else{
-        echo &apos;0.0 is false &lt;/br&gt;&apos;;
-    }
-    if(&apos;&apos;){
-        echo &apos;空字符串 is true &lt;/br&gt;&apos;;
-    }else{
-        echo &apos;空字符串 is false &lt;/br&gt;&apos;;
-    }
-    if($arr){
-        echo &quot;空数组 is true &lt;/br&gt;&quot;;
-    }else{
-        echo &quot;空数组 is false &lt;/br&gt;&quot;;
-    }
-    if(null){
-        echo &apos;null is true &lt;/br&gt;&apos;;
-    }else{
-        echo &apos;null is false &lt;/br&gt;&apos;;
-    }
-</code></pre><p><strong>运行结果如下：</strong></p>
+<p><strong>所有其它值都被认为是 TRUE（包括任何资源）。</strong><br>测试程序如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">    $arr=array();</div><div class="line">    if(0)&#123;</div><div class="line">		echo &apos;0 is true &lt;/br&gt;&apos;;</div><div class="line">	&#125;else&#123;</div><div class="line">		echo &apos;0 is false &lt;/br&gt;&apos;;</div><div class="line">	&#125;</div><div class="line">	if(0.0)&#123;</div><div class="line">		echo &apos;0.0 is true &lt;/br&gt;&apos;;</div><div class="line">	&#125;else&#123;</div><div class="line">		echo &apos;0.0 is false &lt;/br&gt;&apos;;</div><div class="line">	&#125;</div><div class="line">	if(&apos;&apos;)&#123;</div><div class="line">		echo &apos;空字符串 is true &lt;/br&gt;&apos;;</div><div class="line">	&#125;else&#123;</div><div class="line">		echo &apos;空字符串 is false &lt;/br&gt;&apos;;</div><div class="line">	&#125;</div><div class="line">	if($arr)&#123;</div><div class="line">		echo &quot;空数组 is true &lt;/br&gt;&quot;;</div><div class="line">	&#125;else&#123;</div><div class="line">		echo &quot;空数组 is false &lt;/br&gt;&quot;;</div><div class="line">	&#125;</div><div class="line">	if(null)&#123;</div><div class="line">		echo &apos;null is true &lt;/br&gt;&apos;;</div><div class="line">	&#125;else&#123;</div><div class="line">		echo &apos;null is false &lt;/br&gt;&apos;;</div><div class="line">	&#125;</div></pre></td></tr></table></figure></p>
+<p><strong>运行结果如下：</strong></p>
 <p><img src="http://img.blog.csdn.net/20170226181830042?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luYXRfMzM5OTQ3NDQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述">  </p>
 <h3 id="转换为string型"><a href="#转换为string型" class="headerlink" title="转换为string型"></a>转换为string型</h3><p>一个值可以通过在其前面加上 (string) 或用 strval() 函数来转变成字符串。在一个需要字符串的表达式中，会自动转换为 string。比如在使用函数 echo 或 print 时，或在一个变量和一个 string 进行比较时，就会发生这种转换。类型和类型转换可以更好的解释下面的事情，也可参考函数 settype()。 </p>
 <p>一个布尔值 boolean 的 TRUE 被转换成 string 的 “1”。Boolean 的 FALSE 被转换成 “”（空字符串）。这种转换可以在 boolean 和 string 之间相互进行。 </p>
 <p>一个整数 integer 或浮点数 float 被转换为数字的字面样式的 string（包括 float 中的指数部分）。使用指数计数法的浮点数（4.1E+6）也可转换。</p>
 <blockquote>
-<p>注意：数组转化成字符串会变成Array，对象不可以转换成字符串。资源 resource 总会被转变成 “Resource id #1”  这种结构的字符串，其中的 1 是 PHP 在运行时分配给该 resource 的唯一值。不要依赖此结构，可能会有变更。直接把 array，object 或 resource 转换成 string 不会得到除了其类型之外的任何有用信息。可以使用函数 print_r() 和 var_dump() 列出这些类型的内容。 </p>
+<p>注意：数组转化成字符串会变成Array，对象不可以转换成字符串。资源 resource 总会被转变成 “Resource id #1”  这种结构的字符串，其中的 1 是 PHP 在运行时分配给该 resource 的唯一值。不要依赖此结构，可能会有变更。直接把 array，object 或 resource 转换成 string 不会得到除了其类型之外的任何有用信息。可以使用函数 print_r() 和 var_dump() 列出这些类型的内容。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">	error_reporting(E_ALL&amp;~E_NOTICE);</div><div class="line">	$arr=array();</div><div class="line">	$object=new stdClass();  </div><div class="line">	var_dump(strval(1));</div><div class="line">	var_dump(strval(1.01));</div><div class="line">	var_dump(strval(true));</div><div class="line">	var_dump(strval(false));</div><div class="line">	var_dump($arr);</div><div class="line">?&gt;</div></pre></td></tr></table></figure></p>
 </blockquote>
-<pre><code>&lt;?php
-    error_reporting(E_ALL&amp;~E_NOTICE);
-    $arr=array();
-    $object=new stdClass();  
-    var_dump(strval(1));
-    var_dump(strval(1.01));
-    var_dump(strval(true));
-    var_dump(strval(false));
-    var_dump($arr);
-?&gt;
-</code></pre><p><strong>运行结果如下:</strong></p>
+<p><strong>运行结果如下:</strong></p>
 <p><img src="http://img.blog.csdn.net/20170226182415082?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luYXRfMzM5OTQ3NDQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述">  </p>
-<h3 id="转换为浮点数"><a href="#转换为浮点数" class="headerlink" title="转换为浮点数"></a>转换为浮点数</h3><p>如果对字符串进行数值运算，<strong>包含 ‘.’，’e’ 或 ‘E’</strong> 并且其数字值在整型的范围之内（由 PHP_INT_MAX 所定义），该字符串将被当成 <strong>float</strong>来取值，否则转换为integer。</p>
-<pre><code>&lt;?php
-    $foo = 1 + &quot;10.5&quot;;                // $foo is float (11.5)
-    $foo = 1 + &quot;-1.3e3&quot;;              // $foo is float (-1299)
-    $foo = 1 + &quot;bob-1.3e3&quot;;           // $foo is integer (1)
-    $foo = 1 + &quot;bob3&quot;;                // $foo is integer (1)
-    $foo = 1 + &quot;10 Small Pigs&quot;;       // $foo is integer (11)
-    $foo = 4 + &quot;10.2 Little Piggies&quot;; // $foo is float (14.2)
-    $foo = &quot;10.0 pigs &quot; + 1;          // $foo is float (11)
-    $foo = &quot;10.0 pigs &quot; + 1.0;        // $foo is float (11)     
-?&gt;   
-</code></pre><h3 id="转换为整型"><a href="#转换为整型" class="headerlink" title="转换为整型"></a>转换为整型</h3><p>要明确地将一个值转换为 integer，用 (int) 或 (integer) 强制转换。不过大多数情况下都不需要强制转换，因为当运算符，函数或流程控制需要一个 integer 参数时，值会自动转换。还可以通过函数 intval() 来将一个值转换成整型。   </p>
+<h3 id="转换为浮点数"><a href="#转换为浮点数" class="headerlink" title="转换为浮点数"></a>转换为浮点数</h3><p>如果对字符串进行数值运算，<strong>包含 ‘.’，’e’ 或 ‘E’</strong> 并且其数字值在整型的范围之内（由 PHP_INT_MAX 所定义），该字符串将被当成 <strong>float</strong>来取值，否则转换为integer。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">	$foo = 1 + &quot;10.5&quot;;                // $foo is float (11.5)</div><div class="line">	$foo = 1 + &quot;-1.3e3&quot;;              // $foo is float (-1299)</div><div class="line">	$foo = 1 + &quot;bob-1.3e3&quot;;           // $foo is integer (1)</div><div class="line">	$foo = 1 + &quot;bob3&quot;;                // $foo is integer (1)</div><div class="line">	$foo = 1 + &quot;10 Small Pigs&quot;;       // $foo is integer (11)</div><div class="line">	$foo = 4 + &quot;10.2 Little Piggies&quot;; // $foo is float (14.2)</div><div class="line">	$foo = &quot;10.0 pigs &quot; + 1;          // $foo is float (11)</div><div class="line">	$foo = &quot;10.0 pigs &quot; + 1.0;        // $foo is float (11)     </div><div class="line">?&gt;</div></pre></td></tr></table></figure></p>
+<h3 id="转换为整型"><a href="#转换为整型" class="headerlink" title="转换为整型"></a>转换为整型</h3><p>要明确地将一个值转换为 integer，用 (int) 或 (integer) 强制转换。不过大多数情况下都不需要强制转换，因为当运算符，函数或流程控制需要一个 integer 参数时，值会自动转换。还可以通过函数 intval() 来将一个值转换成整型。   </p>
 <p>从<strong>布尔型</strong>转换时，FALSE 将产生出 0（零），TRUE 将产生出 1（壹）。</p>
 <p>当从<strong>浮点数</strong>转换成整数时，将向下取整。 </p>
 <blockquote>
 <p>注意：如果浮点数超出了整数范围（32 位平台下通常为 +/- 2.15e+9 = 2^31，64 位平台下通常为 +/- 9.22e+18 = 2^63），则结果为未定义，因为没有足够的精度给出一个确切的整数结果。在此情况下没有警告，甚至没有任何通知！ </p>
 </blockquote>
-<p>从<strong>字符串</strong>转换时，字符串的首字母若为整型，则转化为该整型，若字符串首字母不是整形，则转化为0.  </p>
-<pre><code>&lt;?php
-    $foo=12 + &quot;5fa&quot;;        //结果为17
-    var_dump($foo);
-    $bar=12 + &quot;f5a&quot;;        //结果为12
-    var_dump($bar);
-    ?&gt;
-</code></pre><h3 id="转换为数组"><a href="#转换为数组" class="headerlink" title="转换为数组"></a>转换为数组</h3><p>对于任意 integer，float，string，boolean 和 resource 类型，如果将一个值转换为数组，将得到一个仅有一个元素的数组，其下标为 0，该元素即为此标量的值。换句话说，(array)$scalarValue 与 array($scalarValue) 完全一样。 </p>
-<p>如果一个 object 类型转换为 array，则结果为一个数组，其单元为该对象的属性。键名将为成员变量名，不过有几点例外：整数属性不可访问；私有变量前会加上类名作前缀；保护变量前会加上一个 ‘*’ 做前缀。这些前缀的前后都各有一个 NULL 字符。这会导致一些不可预知的行为： </p>
-<pre><code>&lt;?php
-    class A {
-        private $A; // This will become &apos;\0A\0A&apos;
-    }
-
-    class B extends A {
-        private $A; // This will become &apos;\0B\0A&apos;
-        public $AA; // This will become &apos;AA&apos;
-    }
-
-    var_dump((array) new B());
-?&gt;   
-</code></pre><h3 id="转换为对象"><a href="#转换为对象" class="headerlink" title="转换为对象"></a>转换为对象</h3><p>如果将一个对象转换成对象，它将不会有任何变化。如果其它任何类型的值被转换成对象，将会创建一个内置类 stdClass 的实例。如果该值为 NULL，则新的实例为空。数组转换成对象将使键名成为属性名并具有相对应的值。对于任何其它的值，名为 scalar 的成员变量将包含该值。  </p>
-<pre><code>&lt;?php
-    $obj = (object) &apos;ciao&apos;;
-    echo $obj-&gt;scalar;  // outputs &apos;ciao&apos;
-?&gt; 
-</code></pre><h3 id="转换为null"><a href="#转换为null" class="headerlink" title="转换为null"></a>转换为null</h3><p>使用 (unset) $var 将一个变量转换为 null 将不会删除该变量或 unset 其值。仅是返回 NULL 值而已。</p>
+<p>从<strong>字符串</strong>转换时，字符串的首字母若为整型，则转化为该整型，若字符串首字母不是整形，则转化为0.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">    $foo=12 + &quot;5fa&quot;;        //结果为17</div><div class="line">    var_dump($foo);</div><div class="line">    $bar=12 + &quot;f5a&quot;;        //结果为12</div><div class="line">    var_dump($bar);</div><div class="line">	?&gt;</div></pre></td></tr></table></figure></p>
+<h3 id="转换为数组"><a href="#转换为数组" class="headerlink" title="转换为数组"></a>转换为数组</h3><p>对于任意 integer，float，string，boolean 和 resource 类型，如果将一个值转换为数组，将得到一个仅有一个元素的数组，其下标为 0，该元素即为此标量的值。换句话说，(array)$scalarValue 与 array($scalarValue) 完全一样。 </p>
+<p>如果一个 object 类型转换为 array，则结果为一个数组，其单元为该对象的属性。键名将为成员变量名，不过有几点例外：整数属性不可访问；私有变量前会加上类名作前缀；保护变量前会加上一个 ‘*’ 做前缀。这些前缀的前后都各有一个 NULL 字符。这会导致一些不可预知的行为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">	class A &#123;</div><div class="line">	    private $A; // This will become &apos;\0A\0A&apos;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	class B extends A &#123;</div><div class="line">	    private $A; // This will become &apos;\0B\0A&apos;</div><div class="line">	    public $AA; // This will become &apos;AA&apos;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	var_dump((array) new B());</div><div class="line">?&gt;</div></pre></td></tr></table></figure></p>
+<h3 id="转换为对象"><a href="#转换为对象" class="headerlink" title="转换为对象"></a>转换为对象</h3><p>如果将一个对象转换成对象，它将不会有任何变化。如果其它任何类型的值被转换成对象，将会创建一个内置类 stdClass 的实例。如果该值为 NULL，则新的实例为空。数组转换成对象将使键名成为属性名并具有相对应的值。对于任何其它的值，名为 scalar 的成员变量将包含该值。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">	$obj = (object) &apos;ciao&apos;;</div><div class="line">	echo $obj-&gt;scalar;  // outputs &apos;ciao&apos;</div><div class="line">?&gt;</div></pre></td></tr></table></figure></p>
+<h3 id="转换为null"><a href="#转换为null" class="headerlink" title="转换为null"></a>转换为null</h3><p>使用 (unset) $var 将一个变量转换为 null 将不会删除该变量或 unset 其值。仅是返回 NULL 值而已。</p>
 
       
     </div>
@@ -582,7 +492,7 @@
             
               <a href="/archives/">
             
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">4</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -671,7 +581,7 @@
 
 
 <span id="busuanzi_container_site_pv">
-    访问量<span id="busuanzi_value_site_pv"></span>次
+    博客总访问量：<span id="busuanzi_value_site_pv"></span>次
 </span>
 
 
