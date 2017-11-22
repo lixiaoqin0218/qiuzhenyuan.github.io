@@ -77,7 +77,7 @@
 <meta property="og:description" content="基本概念做Web开发的同学多多少少都会遇到过乱码的问题。字符编码属于计算机领域的基础知识，今天简单地做了一下整理。   我们知道，所有的信息在计算机中，都是以一个二进制数来表示的，每个二进制位有0和1两种状态。当我们把字符串A保存在计算机中，A会被按一定的规则转换成二进制数01000001,然后保存在计算机中，这个转换的过程就叫做编码。当我们要显示字符串时，首先要把二进制数01000001取出来，">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://wx4.sinaimg.cn/mw690/857afa84gy1flmin5csfcj20r00hlk1u.jpg">
-<meta property="og:updated_time" content="2017-11-22T13:54:50.871Z">
+<meta property="og:updated_time" content="2017-11-22T13:57:48.565Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="认识字符编码">
 <meta name="twitter:description" content="基本概念做Web开发的同学多多少少都会遇到过乱码的问题。字符编码属于计算机领域的基础知识，今天简单地做了一下整理。   我们知道，所有的信息在计算机中，都是以一个二进制数来表示的，每个二进制位有0和1两种状态。当我们把字符串A保存在计算机中，A会被按一定的规则转换成二进制数01000001,然后保存在计算机中，这个转换的过程就叫做编码。当我们要显示字符串时，首先要把二进制数01000001取出来，">
@@ -340,8 +340,7 @@
 <p>但是世界上有这么多国家，有没有一个通用的字符编码呢?答案是有的，就是<strong>Unicode编码</strong> 。</p>
 <h2 id="一统天下的Unicode编码"><a href="#一统天下的Unicode编码" class="headerlink" title="一统天下的Unicode编码"></a>一统天下的Unicode编码</h2><p>Unicode是有ISO制定的字符编码，它用6个16进制来表示字符，那么理论上就可以表示<code>16 ^ 6 = 16777216</code> 个字符，足以表示世界上所有的字符了。  </p>
 <p>但是，Unicode也有一个问题，就是<strong>过于庞大</strong> 。对于字符 a 来说，如果使用 ASCII 编码，可以表示为 <code>0x61</code>，只要一个字节就能存下，但它的 Unicode 码位是 <code>0x000061</code>，需要三个字节。因此采用 Unicode 编码的英文内容，会比 ASCII 编码大三倍。 这大大增加了文件本地存储时占用的空间以及传输时的体积。      </p>
-<p>于是，就有了对Unicode字符集再次编码的编码方式，常见的有utf-8，utf-16 等<strong>**。                                                                                                                                                                    
-</strong>utf-8<strong> 使用 </strong>变长编码<strong> 方式，它用1到4个字节来表示一个符号，根据符号不同而改变字节的长度。UTF-8是兼容Ascii的，对大部分中文而言，一个中文字符需要用</strong>三个字节** 表示。UTF-8是在互联网上使用最广的一种unicode的实现方式。</p>
+<p>于是，就有了对Unicode字符集再次编码的编码方式，常见的有utf-8，utf-16 等。<br><strong>utf-8</strong> 使用 <strong>变长编码</strong> 方式，它用1到4个字节来表示一个符号，根据符号不同而改变字节的长度。UTF-8是兼容Ascii的，对大部分中文而言，一个中文字符需要用<strong>三个字节</strong> 表示。UTF-8是在互联网上使用最广的一种unicode的实现方式。</p>
 <p><strong>utf-16</strong> 是操作系统内存运算中最常用的编码方案。尽管有Unicode字符非常多，但是实际上大多数人不会用到超过前65535个以外的字符。因此，UTF-16将0–65535范围内的字符编码成2个字节。</p>
 <h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://juejin.im/post/59c06e6af265da065754c7d7" target="_blank" rel="external">字符串编码入门科普</a>  </p>
 <p><a href="http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html" title="字符编码笔记：ASCII，Unicode 和 UTF-8" target="_blank" rel="external">字符编码笔记：ASCII，Unicode 和 UTF-8</a>  </p>
