@@ -78,7 +78,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://wx4.sinaimg.cn/mw690/857afa84gy1flfq8adc1hj20dx03y3yk.jpg">
 <meta property="og:image" content="https://wx4.sinaimg.cn/mw690/857afa84gy1flfq8q6g7bj20ok03h0ss.jpg">
-<meta property="og:updated_time" content="2017-11-17T11:20:32.762Z">
+<meta property="og:updated_time" content="2017-11-18T07:22:48.291Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Web安全系列——XSS攻击">
 <meta name="twitter:description" content="前段时间在学习Web安全方面的知识，对这方面有了进一步的了解，决定写文章记录下来，只是对Web安全方面知识的一些总结，没有太多的深度。    XSS攻击简介跨站脚本攻击(XSS),英文全称 Cross Site Script, 是Web安全头号大敌。XSS攻击，一般是指黑客通过在网页中注入恶意脚本，当用户浏览网页时，恶意脚本执行，控制用户浏览器行为的一种攻击方式。其中，XSS攻击通常分为反射型X">
@@ -356,10 +356,7 @@
 </ul>
 <p>一个Cookie的使用过程如下：<br>Step1: 浏览器向服务器发送请求，这时候没有cookie。<br>Step2: 服务器返回同时，发送Set-Cookie头，向客户端浏览器写入Cookie。<br>Step3: 在该Cookie到期前，浏览器访问该域名下所有的页面，都将发送该Cookie。<br>而HttpOnly是在Set-Cookie时标记的。      </p>
 <h3 id="输入检查"><a href="#输入检查" class="headerlink" title="输入检查"></a>输入检查</h3><p>常见的Web漏洞，如XSS、SQL注入等，都要求攻击者构造一些特殊的字符串，而这些字符串是一般用户不会用到的，所以进行输入检查就很有必要了。<br>输入检查可以在用户输入的<strong>格式检查</strong>中进行。很多网站的用户名都要求是字母及数字的组合如“abc1234”，其实也能过滤一部分的XSS和SQL注入。但是，这种在客户端的限制很容易<strong>被绕过</strong>，攻击者可以用JavaScript或一些请求工具，直接构造请求，想网站注入XSS或者SQL。所以，除了在客户端进行格式检查，往往还需要在后端进行二次检查。客户端的检查主要作用是阻挡大部分误操作的正常用户，从而节约服务器资源。  </p>
-<h3 id="对输出转义"><a href="#对输出转义" class="headerlink" title="对输出转义"></a>对输出转义</h3><p>在输出数据之前对潜在的威胁的字符进行编码、转义是防御XSS攻击十分有效的措施。</p>
-<ol>
-<li>为了对抗XSS,在HtmlEncode中至少转换以下字符：</li>
-</ol>
+<h3 id="对输出转义"><a href="#对输出转义" class="headerlink" title="对输出转义"></a>对输出转义</h3><p>在输出数据之前对潜在的威胁的字符进行编码、转义是防御XSS攻击十分有效的措施。<br>为了对抗XSS,在HtmlEncode中至少转换以下字符：</p>
 <p>&lt; 转成 <code>&amp;lt</code>;</p>
 <p><code>&gt;</code> 转成 <code>&amp;gt</code>;</p>
 <p>&amp; 转成 <code>&amp;amp</code>;</p>
@@ -480,7 +477,7 @@
             
               <a href="/archives/">
             
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">6</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -491,7 +488,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">4</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
