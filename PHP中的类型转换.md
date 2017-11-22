@@ -14,7 +14,7 @@ tags:
 ## 自动类型转换的判别
 
 PHP 在变量定义中不需要（或不支持）明确的类型定义；变量类型是根据使用该变量的上下文所决定的。也就是说，如果把一个 string 值赋给变量 $var，$var 就成了一个 string。如果又把一个integer 赋给 $var，那它就成了一个integer。  
-
+```
 	<?php
 	    $var=123;
 	    var_dump($var);
@@ -23,13 +23,13 @@ PHP 在变量定义中不需要（或不支持）明确的类型定义；变量�
 	    $var=true;
 	    var_dump($var);
 	?> 
-
+```
 
 **输出结果如下：**
 ![这里写图片描述](http://img.blog.csdn.net/20170226181551803?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luYXRfMzM5OTQ3NDQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
 
 PHP 的自动类型转换的一个例子是加法运算符"+"。如果任何一个操作数是float，则所有的操作数都被当成float，结果也是float。否则操作数会被解释为integer，结果也是integer。注意这并没有改变这些操作数本身的类型；改变的仅是这些操作数如何被求值以及表达式本身的类型。  
-
+```
 	<?php
 	    //运算自动转换
 	    $foo = "0";  // $foo 是字符串 (ASCII 48)
@@ -43,6 +43,7 @@ PHP 的自动类型转换的一个例子是加法运算符"+"。如果任何一�
 	    var_dump($foo);
 	    var_dump($bar);
 	?>
+```
 **运行结果如下：**
 ![这里写图片描述](http://img.blog.csdn.net/20170226181654026?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luYXRfMzM5OTQ3NDQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
 
@@ -79,7 +80,7 @@ PHP 中的类型强制转换和 C 中的非常像：在要转换的变量之前�
 
 **所有其它值都被认为是 TRUE（包括任何资源）。**  
 测试程序如下：
-
+```
 	<?php
 	    $arr=array();
 	    if(0){
@@ -107,6 +108,7 @@ PHP 中的类型强制转换和 C 中的非常像：在要转换的变量之前�
 		}else{
 			echo 'null is false </br>';
 		}
+```
 
 **运行结果如下：**
 
@@ -121,7 +123,7 @@ PHP 中的类型强制转换和 C 中的非常像：在要转换的变量之前�
 一个整数 integer 或浮点数 float 被转换为数字的字面样式的 string（包括 float 中的指数部分）。使用指数计数法的浮点数（4.1E+6）也可转换。
 
 >注意：数组转化成字符串会变成Array，对象不可以转换成字符串。资源 resource 总会被转变成 "Resource id #1"  这种结构的字符串，其中的 1 是 PHP 在运行时分配给该 resource 的唯一值。不要依赖此结构，可能会有变更。直接把 array，object 或 resource 转换成 string 不会得到除了其类型之外的任何有用信息。可以使用函数 print_r() 和 var_dump() 列出这些类型的内容。 
-
+```
 	<?php
 		error_reporting(E_ALL&~E_NOTICE);
 		$arr=array();
@@ -132,6 +134,7 @@ PHP 中的类型强制转换和 C 中的非常像：在要转换的变量之前�
 		var_dump(strval(false));
 		var_dump($arr);
 	?>
+```
 **运行结果如下:**
 
 ![这里写图片描述](http://img.blog.csdn.net/20170226182415082?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2luYXRfMzM5OTQ3NDQ=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)  
@@ -139,7 +142,7 @@ PHP 中的类型强制转换和 C 中的非常像：在要转换的变量之前�
 
 ### 转换为浮点数
 如果对字符串进行数值运算，**包含 '.'，'e' 或 'E'** 并且其数字值在整型的范围之内（由 PHP_INT_MAX 所定义），该字符串将被当成 **float**来取值，否则转换为integer。
-
+```
 	<?php
 		$foo = 1 + "10.5";                // $foo is float (11.5)
 		$foo = 1 + "-1.3e3";              // $foo is float (-1299)
@@ -150,7 +153,7 @@ PHP 中的类型强制转换和 C 中的非常像：在要转换的变量之前�
 		$foo = "10.0 pigs " + 1;          // $foo is float (11)
 		$foo = "10.0 pigs " + 1.0;        // $foo is float (11)     
 	?>   
-
+```
 
 
 ### 转换为整型  
@@ -162,19 +165,19 @@ PHP 中的类型强制转换和 C 中的非常像：在要转换的变量之前�
 >注意：如果浮点数超出了整数范围（32 位平台下通常为 +/- 2.15e+9 = 2^31，64 位平台下通常为 +/- 9.22e+18 = 2^63），则结果为未定义，因为没有足够的精度给出一个确切的整数结果。在此情况下没有警告，甚至没有任何通知！ 
 
 从**字符串**转换时，字符串的首字母若为整型，则转化为该整型，若字符串首字母不是整形，则转化为0.  
-
+```
 	<?php
 	    $foo=12 + "5fa";        //结果为17
 	    var_dump($foo);
 	    $bar=12 + "f5a";        //结果为12
 	    var_dump($bar);
 		?>
-
+```
 ### 转换为数组  
 对于任意 integer，float，string，boolean 和 resource 类型，如果将一个值转换为数组，将得到一个仅有一个元素的数组，其下标为 0，该元素即为此标量的值。换句话说，(array)$scalarValue 与 array($scalarValue) 完全一样。 
 
 如果一个 object 类型转换为 array，则结果为一个数组，其单元为该对象的属性。键名将为成员变量名，不过有几点例外：整数属性不可访问；私有变量前会加上类名作前缀；保护变量前会加上一个 '*' 做前缀。这些前缀的前后都各有一个 NULL 字符。这会导致一些不可预知的行为： 
-
+```
 	<?php
 		class A {
 		    private $A; // This will become '\0A\0A'
@@ -187,15 +190,15 @@ PHP 中的类型强制转换和 C 中的非常像：在要转换的变量之前�
 		
 		var_dump((array) new B());
 	?>   
-
+```
 ### 转换为对象  
 如果将一个对象转换成对象，它将不会有任何变化。如果其它任何类型的值被转换成对象，将会创建一个内置类 stdClass 的实例。如果该值为 NULL，则新的实例为空。数组转换成对象将使键名成为属性名并具有相对应的值。对于任何其它的值，名为 scalar 的成员变量将包含该值。  
-
+```
 	<?php
 		$obj = (object) 'ciao';
 		echo $obj->scalar;  // outputs 'ciao'
 	?> 
-
+```
 ### 转换为null  
 使用 (unset) $var 将一个变量转换为 null 将不会删除该变量或 unset 其值。仅是返回 NULL 值而已。
 
