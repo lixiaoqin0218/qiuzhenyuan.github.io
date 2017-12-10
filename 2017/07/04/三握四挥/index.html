@@ -80,7 +80,7 @@
 <meta property="og:image" content="https://wx4.sinaimg.cn/mw690/857afa84gy1fm9ghlrprcj20l30gt0t3.jpg">
 <meta property="og:image" content="https://wx2.sinaimg.cn/mw690/857afa84gy1fm9ghjp1isj20l20gtmxi.jpg">
 <meta property="og:image" content="https://wx3.sinaimg.cn/mw690/857afa84gy1fm9h4hfowmj20l30i13yv.jpg">
-<meta property="og:updated_time" content="2017-12-08T09:31:15.780Z">
+<meta property="og:updated_time" content="2017-12-09T03:13:50.298Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="说说TCP的“三握四挥”">
 <meta name="twitter:description" content="TCP的“三次握手”与“四次挥手”是程序员面试中，出场率最高的问题了。今天就简单地说一下。  建立TCP连接TCP连接的建立，需要三次握手才能完成。SYN与ACK是TCP段中不同类型的元数据。SYN用于标志报文，以方便报文进行重组。ACK表示“确认收到”，是接收方计算机告诉发送方计算机“好，已收到”的方式。">
@@ -291,8 +291,9 @@
           
             
           
-
+		  
           
+		  
           
 
           
@@ -326,6 +327,7 @@
 <p><img src="https://wx2.sinaimg.cn/mw690/857afa84gy1fm9ghjp1isj20l20gtmxi.jpg" alt="三次握手的序列号与应答号"></p>
 <h2 id="关闭TCP连接"><a href="#关闭TCP连接" class="headerlink" title="关闭TCP连接"></a>关闭TCP连接</h2><p>建立一条TCP连接需要三个报文（段），而关闭一条TCP连接需要四个报文（段）。这是由TCP的 <strong>半关闭</strong> 导致的。TCP连接是全双工的（两个方向的数据流互相独立），每个方向都需要独立地关闭。<br><strong>第一步:</strong> 节点A首先调用关闭，这一端执行<strong>主动关闭</strong> ，TCP发送FIN段，表示它已经发送完数据。<br><strong>第二步：</strong> 节点B收到FIN，执行<strong>被动关闭</strong> 。TCP对FIN进行应答。FIN的接收，意味着节点B这个连接上不会再接收到数据。<br><strong>第三步：</strong> 在节点B自己发送完数据后，向对方发送FIN。<br><strong>第四步：</strong> 节点B收到节点A发过来的应答ACK。四次挥手完成。  </p>
 <p><img src="https://wx3.sinaimg.cn/mw690/857afa84gy1fm9h4hfowmj20l30i13yv.jpg" alt="四次挥手"></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>《计算机网络基础教程》  </p>
 
       
     </div>
@@ -338,6 +340,32 @@
     
 
     
+
+
+	
+<div>
+  
+    ﻿
+<div style="text-align:center;color: #ccc;font-size:14px;">
+------ 本文结束 ------</div>
+<br/>
+<div style="border: 1px solid black">
+<div style="margin-left:10px">
+<span style="font-weight:blod">版权声明</span>
+<img src="此处填自己版权声明图片地址" >
+<br/>
+
+本文由<b>邱振源</b>创作和发表，
+首发于<a href="https://qiuzhenyuan.github.io" style="color:#258FC6">邱振源的技术博客</a> ，转载请注明<b>作者</b>及<b>出处</b>。</p>
+</div>
+</div>
+
+
+
+
+  
+</div>
+
 
     <footer class="post-footer">
       
@@ -356,8 +384,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/07/04/PHP中无所不能的数组函数/" rel="next" title="PHP中无所不能的数组函数（长期更新）">
-                <i class="fa fa-chevron-left"></i> PHP中无所不能的数组函数（长期更新）
+              <a href="/2017/07/04/PHP中无所不能的数组函数/" rel="next" title="PHP那些无所不能的数组函数（长期更新）">
+                <i class="fa fa-chevron-left"></i> PHP那些无所不能的数组函数（长期更新）
               </a>
             
           </div>
@@ -515,7 +543,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#建立TCP连接"><span class="nav-number">1.</span> <span class="nav-text">建立TCP连接</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#连接的建立"><span class="nav-number">1.1.</span> <span class="nav-text">连接的建立</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#序列号与应答号"><span class="nav-number">1.2.</span> <span class="nav-text">序列号与应答号</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关闭TCP连接"><span class="nav-number">2.</span> <span class="nav-text">关闭TCP连接</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#建立TCP连接"><span class="nav-number">1.</span> <span class="nav-text">建立TCP连接</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#连接的建立"><span class="nav-number">1.1.</span> <span class="nav-text">连接的建立</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#序列号与应答号"><span class="nav-number">1.2.</span> <span class="nav-text">序列号与应答号</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关闭TCP连接"><span class="nav-number">2.</span> <span class="nav-text">关闭TCP连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
             
 
           </div>
