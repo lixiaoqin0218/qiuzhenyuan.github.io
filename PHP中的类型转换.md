@@ -2,7 +2,7 @@
 title: PHP中的类型转换
 date: 2017-09-18 17:46:47
 categories: "语言细节" 
-tags:
+tags: "PHP"
 ---
 
 
@@ -203,7 +203,8 @@ PHP 中的类型强制转换和 C 中的非常像：在要转换的变量之前�
 使用 (unset) $var 将一个变量转换为 null 将不会删除该变量或 unset 其值。仅是返回 NULL 值而已。
 
 
-
+## 参考资料
+[PHP - Manual](http://www.php.net/manual/zh/ "PHP - Manual")
 
 
 
