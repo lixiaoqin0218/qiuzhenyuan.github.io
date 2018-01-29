@@ -3,7 +3,7 @@ title: CGI与FastCGI
 date: 2017-11-28 23:47:27
 categories: "Web开发常识" 
 ---
-## CGI
+## CGI简介
 CGI全称是“通用网管接口”（Common Gateway Interface),是Web服务器（如Appache，Nginx）与外部应用程序通讯的一种接口标准。CGI程序可以用任何一种语言编写，只要这种语言具有标准输入、输出和环境变量。如php,perl等。  
 
 <!-- more -->

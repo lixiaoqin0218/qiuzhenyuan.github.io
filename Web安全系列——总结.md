@@ -1,5 +1,5 @@
 ---
-title: 《白帽子讲Web安全》读书笔记
+title: Web安全系列——总结
 date: 2017-11-18 17:46:47
 categories: "读书笔记" 
 tags: [Web安全,读书笔记]
