@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="网络," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="几个基本概念内核态与用户态内核，是操作系统管理计算机资源的核心层软件。内核的职责包括进程控制、进程调度、内存管理、文件管理以及设备管理等。 现代的CPU架构一般允许在两种模式下运行，分别是内核态和用户态，与之对应，虚拟内存又划分为内核空间和用户空间。当CPU在用户态下运行时，只能访问用户空间的内存；当CPU在内核态下运行时，则可以访问内核空间的内存，也可以访问用户空间的内存。 当我们面向进程考虑问">
+<meta name="keywords" content="网络">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网络IO模型杂谈">
+<meta property="og:url" content="http://yoursite.com/2018/04/19/网络IO模型杂谈/index.html">
+<meta property="og:site_name" content="邱振源的博客">
+<meta property="og:description" content="几个基本概念内核态与用户态内核，是操作系统管理计算机资源的核心层软件。内核的职责包括进程控制、进程调度、内存管理、文件管理以及设备管理等。 现代的CPU架构一般允许在两种模式下运行，分别是内核态和用户态，与之对应，虚拟内存又划分为内核空间和用户空间。当CPU在用户态下运行时，只能访问用户空间的内存；当CPU在内核态下运行时，则可以访问内核空间的内存，也可以访问用户空间的内存。 当我们面向进程考虑问">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://wx1.sinaimg.cn/mw690/857afa84ly1fq0h9rovxuj20lo0b8js7.jpg">
+<meta property="og:image" content="https://wx2.sinaimg.cn/mw690/857afa84ly1fq0h7y6sfvj20n00ctabi.jpg">
+<meta property="og:image" content="https://wx4.sinaimg.cn/mw690/857afa84ly1fq0h8ls5m4j20on0enabf.jpg">
+<meta property="og:image" content="https://wx1.sinaimg.cn/mw690/857afa84ly1fq0h8pep6gj20o20d7t9r.jpg">
+<meta property="og:updated_time" content="2018-11-03T06:05:43.758Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="网络IO模型杂谈">
+<meta name="twitter:description" content="几个基本概念内核态与用户态内核，是操作系统管理计算机资源的核心层软件。内核的职责包括进程控制、进程调度、内存管理、文件管理以及设备管理等。 现代的CPU架构一般允许在两种模式下运行，分别是内核态和用户态，与之对应，虚拟内存又划分为内核空间和用户空间。当CPU在用户态下运行时，只能访问用户空间的内存；当CPU在内核态下运行时，则可以访问内核空间的内存，也可以访问用户空间的内存。 当我们面向进程考虑问">
+<meta name="twitter:image" content="https://wx1.sinaimg.cn/mw690/857afa84ly1fq0h9rovxuj20lo0b8js7.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/04/19/网络IO模型杂谈/"/>
+
+
+
+
+
+  <title>网络IO模型杂谈 | 邱振源的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">邱振源的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/19/网络IO模型杂谈/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhenyuan Qiu">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="邱振源的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">网络IO模型杂谈</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-19T16:54:54+08:00">
+                2018-04-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+		  
+          
+		  
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="几个基本概念"><a href="#几个基本概念" class="headerlink" title="几个基本概念"></a>几个基本概念</h2><h3 id="内核态与用户态"><a href="#内核态与用户态" class="headerlink" title="内核态与用户态"></a>内核态与用户态</h3><p><strong>内核</strong>，是操作系统管理计算机资源的核心层软件。内核的职责包括进程控制、进程调度、内存管理、文件管理以及设备管理等。</p>
+<p>现代的CPU架构一般允许在两种模式下运行，分别是<strong>内核态</strong>和<strong>用户态</strong>，与之对应，虚拟内存又划分为<strong>内核空间</strong>和<strong>用户空间</strong>。当CPU在用户态下运行时，只能访问用户空间的内存；当CPU在内核态下运行时，则可以访问内核空间的内存，也可以访问用户空间的内存。</p>
+<p>当我们面向进程考虑问题时，我们会发现很多东西是不可预测，或者说是不可掌控的。例如我们不知道自己这个进程什么时候会被分配时间片，时间片什么时候会用完；当调用<code>malloc()</code>函数时，系统是怎么把一块大小合适的内存块，分配给调用方；一个进程内存空间中的页面，哪些会被调到交换区，哪些又会被掉到内存中；进程自身不能创建进程和结束进程（进程自身不能创建或结束进程，只是通过<strong>系统调用</strong>，让内核<strong>帮忙</strong>去创建或结束进程）</p>
+<a id="more"></a>  
+<h3 id="系统调用"><a href="#系统调用" class="headerlink" title="系统调用"></a>系统调用</h3><p>系统调用，是操作系统内核的入口。用户可以通过系统调用，让内核以自己的名义，去执行某些操作。</p>
+<h3 id="网络IO中的等待"><a href="#网络IO中的等待" class="headerlink" title="网络IO中的等待"></a>网络IO中的等待</h3><p>网络操作中，经常需要等待，常见的有以下这些情况：</p>
+<ul>
+<li>输入操作：等待数据到达套接字接收缓冲区。</li>
+<li>输出操作：等待套接字发送缓冲区有足够的空间容纳即将要发送的数据。</li>
+<li>接受连接请求：等待新的连接的到来。</li>
+<li>发送连接请求：等待客户端的服务单会送客户端的SYN所对应ACK.</li>
+</ul>
+<h2 id="四种IO模型"><a href="#四种IO模型" class="headerlink" title="四种IO模型"></a>四种IO模型</h2><p>网络IO模型包括阻塞IO、非阻塞IO、多路复用IO以及异步IO.</p>
+<h3 id="阻塞IO"><a href="#阻塞IO" class="headerlink" title="阻塞IO"></a>阻塞IO</h3><p>首先需要明白的是，阻塞与非阻塞是指用户线程调用内核的方式。阻塞IO是指IO操作彻底完成后，CPU才会从内核态切换到用户态，用户进程才获得CPU的控制权。</p>
+<p>大部分socket接口在默认状态下都是阻塞型的。就是在系统调用后，需要等内核获得结果或者超时才能返回，而在此之前，一直让线程处于等待的状态不做其他操作。</p>
+<p><a href="https://wx1.sinaimg.cn/mw690/857afa84ly1fq0h9rovxuj20lo0b8js7.jpg" target="_blank" rel="external"><img src="https://wx1.sinaimg.cn/mw690/857afa84ly1fq0h9rovxuj20lo0b8js7.jpg" alt="img"></a></p>
+<p>为了提高阻塞IO处理请求的效率，一般会使用多线程或者多进程的方式。</p>
+<h3 id="非阻塞IO"><a href="#非阻塞IO" class="headerlink" title="非阻塞IO"></a>非阻塞IO</h3><p>非阻塞IO就是在发起系统调用后，当内核数据还没准备好时，不会阻塞住进程，而是马上返回一个错误。</p>
+<p>从用户进程的角度，当它发起一个系统调用，马上可以得到一个结果，如果结果是错误，它就知道内核还没准备好，于是它可以再次发起系统调用，或者等待一段时间再发起。</p>
+<p><a href="https://wx2.sinaimg.cn/mw690/857afa84ly1fq0h7y6sfvj20n00ctabi.jpg" target="_blank" rel="external"><img src="https://wx2.sinaimg.cn/mw690/857afa84ly1fq0h7y6sfvj20n00ctabi.jpg" alt="非阻塞IO"></a></p>
+<p>在非阻塞IO中模型中，需要用户进程主动去轮询内核。</p>
+<h3 id="多路复用IO"><a href="#多路复用IO" class="headerlink" title="多路复用IO"></a>多路复用IO</h3><p>多路复用IO的基本原理是，有个函数（如select）会不断轮询所有socket，当某个socket有数据到达，就通知用户进程。</p>
+<p><a href="https://wx4.sinaimg.cn/mw690/857afa84ly1fq0h8ls5m4j20on0enabf.jpg" target="_blank" rel="external"><img src="https://wx4.sinaimg.cn/mw690/857afa84ly1fq0h8ls5m4j20on0enabf.jpg" alt="img"></a></p>
+<p>当用户调用了select，那么进程都会被阻塞，而内核监听所有的socket，当任何一个socket中的数据准备好，select就会返回。这时用户进程再次调用read操作。</p>
+<p>在多路复用IO模型中，每个socket一般都设置为非阻塞的，整个用户进程被select这个函数阻塞而不是被IO操作负责</p>
+<h3 id="异步IO"><a href="#异步IO" class="headerlink" title="异步IO"></a>异步IO</h3><p>异步IO模型就是当用户发起系统调用后，可以立刻去做其它事情；从内核角度则是收到请求后立刻返回，不作阻塞，当内核数据准备完成，就把数据拷贝到用户内存，所有操作完成后会给用户进程发一个信号。</p>
+<p><a href="https://wx1.sinaimg.cn/mw690/857afa84ly1fq0h8pep6gj20o20d7t9r.jpg" target="_blank" rel="external"><img src="https://wx1.sinaimg.cn/mw690/857afa84ly1fq0h8pep6gj20o20d7t9r.jpg" alt="img"></a></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>《UNIX编程手册》</p>
+<p>《后台开发核心技术与应用实践》</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+
+	
+<div>
+  
+    ﻿
+<div style="text-align:center;color: #ccc;font-size:14px;">
+------ 本文结束 ------</div>
+<br/>
+<div style="border: 1px solid black">
+<div style="margin-left:10px">
+<span style="font-weight:blod">版权声明</span>
+
+<br/>
+本文由<b>邱振源</b>创作，
+首发于<a href="https://qiuzhenyuan.github.io" style="color:#258FC6">邱振源的技术博客</a> 。转载请注明<b>作者</b>及<b>出处</b>。</p>
+</div>
+</div>
+
+
+
+
+  
+</div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/网络/" rel="tag"># 网络</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/03/几道动态规划题/" rel="next" title="几道动态规划题">
+                <i class="fa fa-chevron-left"></i> 几道动态规划题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <p class="site-author-name" itemprop="name">Zhenyuan Qiu</p>
+            <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/qiuzhenyuan" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.linkedin.com/in/%E6%8C%AF%E6%BA%90-%E9%82%B1-a8771813b/" target="_blank" title="LinkedIn">
+                  
+                    <i class="fa fa-fw fa-globe"></i>LinkedIn</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#几个基本概念"><span class="nav-number">1.</span> <span class="nav-text">几个基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内核态与用户态"><span class="nav-number">1.1.</span> <span class="nav-text">内核态与用户态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#系统调用"><span class="nav-number">1.2.</span> <span class="nav-text">系统调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#网络IO中的等待"><span class="nav-number">1.3.</span> <span class="nav-text">网络IO中的等待</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四种IO模型"><span class="nav-number">2.</span> <span class="nav-text">四种IO模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#阻塞IO"><span class="nav-number">2.1.</span> <span class="nav-text">阻塞IO</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#非阻塞IO"><span class="nav-number">2.2.</span> <span class="nav-text">非阻塞IO</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多路复用IO"><span class="nav-number">2.3.</span> <span class="nav-text">多路复用IO</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#异步IO"><span class="nav-number">2.4.</span> <span class="nav-text">异步IO</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+<div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhenyuan Qiu</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by  <a class="theme-link" href="https://hexo.io">Hexo</a> </div>
+
+  <span class="post-meta-divider">|</span>
+
+
+<span id="busuanzi_container_site_pv">
+    博客总访问量：<span id="busuanzi_value_site_pv"></span>次
+</span>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+	
+
+</body>
+</html>

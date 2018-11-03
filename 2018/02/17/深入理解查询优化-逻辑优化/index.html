@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="查询优化," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="简介逻辑优化要解决的问题是：如何找出SQL语句等价的变换形式，使SQL执行更加高效。逻辑优化主要做的事情，就是对查询进行重写。查询重写的理论基础是关系代数。">
+<meta name="keywords" content="查询优化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解查询优化 | 逻辑优化">
+<meta property="og:url" content="http://yoursite.com/2018/02/17/深入理解查询优化-逻辑优化/index.html">
+<meta property="og:site_name" content="邱振源的博客">
+<meta property="og:description" content="简介逻辑优化要解决的问题是：如何找出SQL语句等价的变换形式，使SQL执行更加高效。逻辑优化主要做的事情，就是对查询进行重写。查询重写的理论基础是关系代数。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-03-28T16:56:20.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深入理解查询优化 | 逻辑优化">
+<meta name="twitter:description" content="简介逻辑优化要解决的问题是：如何找出SQL语句等价的变换形式，使SQL执行更加高效。逻辑优化主要做的事情，就是对查询进行重写。查询重写的理论基础是关系代数。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/02/17/深入理解查询优化-逻辑优化/"/>
+
+
+
+
+
+  <title>深入理解查询优化 | 逻辑优化 | 邱振源的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">邱振源的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/17/深入理解查询优化-逻辑优化/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhenyuan Qiu">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="邱振源的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">深入理解查询优化 | 逻辑优化</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-17T22:59:40+08:00">
+                2018-02-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+
+			
+			
+			
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/数据库/" itemprop="url" rel="index">
+                    <span itemprop="name">数据库</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+		  
+          
+		  
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>逻辑优化要解决的问题是：如何找出SQL语句等价的变换形式，使SQL执行更加高效。逻辑优化主要做的事情，就是对查询进行重写。查询重写的理论基础是<strong>关系代数</strong>。  </p>
+<a id="more"></a>
+<h2 id="基本操作的优化"><a href="#基本操作的优化" class="headerlink" title="基本操作的优化"></a>基本操作的优化</h2><p>传统OLTP数据库使用基于选择（SELECT)、投影（PROJECT)、连接（JOIN）3种基本操作结合的查询。这些三种基本操作的优化方式如下：</p>
+<p><strong>选择操作</strong>：选择对应着<strong>限制条件</strong>。优化的方式是选择操作下推，目的是减少连接操作之前的元组数，使得中间的临时关系<strong>尽量少</strong>（元组数少，连接得到的元组数就少），这就可以减少IO消耗，节约内存空间。</p>
+<p><strong>投影操作</strong>：投影操作对应着SELECT 查询的目的列对象，优化方式是投影操作下推，目的是减少连接操作前的列数，使得中间临时关系<strong>尽量小</strong>（特别注意差别：选择操作是是元组个数“尽量少”，投影操作是使一条元组“尽量小”）。</p>
+<p><strong>连接操作</strong>：连接操作对应的是连接条件。多表连接中每个表被连接的顺序决定着效率。多表连接每个表被连击的顺序由语义决定，表之间的连接顺序是不能随意交换的。</p>
+<p>选择和投影操作可以在关系代数规则的知道下进行优化。表连接需要多表连接的相关算法完成优化。</p>
+<h2 id="常见逻辑优化"><a href="#常见逻辑优化" class="headerlink" title="常见逻辑优化"></a>常见逻辑优化</h2><h3 id="外连接消除"><a href="#外连接消除" class="headerlink" title="外连接消除"></a>外连接消除</h3><p>逻辑优化的一个重要技术，就是把<strong>外连接</strong>转化为<strong>内连接</strong>。外连接包括全外连接，左外连接和右外连接。转换为内连接的意义如下：</p>
+<ol>
+<li>查询优化器处理外连接所需要的时间和操作多与内连接（元组数更多）；</li>
+<li>优化器在选择连接顺序时可以更灵活，因为内连接的顺序可以调整，外连接不可以；</li>
+<li>表的一些连接算法（如块嵌套连接算法）将规模小的或筛选条件最严格的表作为“外表”（放在连接顺序的最前面，是多层循环的外循环层），可以减少不必要的IO 开销。</li>
+</ol>
+<blockquote>
+<p><strong>内联接</strong>：结果集中，只包含满足连接条件的行。</p>
+<p><strong>左外联接</strong>：结果集中包括左表所有的行，而不仅仅包括满足连接条件的行。如果左表的某行在右表中没有匹配行，则该行右表所有的选择列都为空值</p>
+<p><strong>右外联接</strong>：右连接时左连接的反向连接，与左连接同理。</p>
+<p><strong>全外联接</strong>：返回左表和右表的所有行。如果某行在另一个表没有匹配行时，则另一个表的选择列包含空值。</p>
+</blockquote>
+<h4 id="什么时候可以消除外连接"><a href="#什么时候可以消除外连接" class="headerlink" title="什么时候可以消除外连接"></a>什么时候可以消除外连接</h4><table>
+<thead>
+<tr>
+<th></th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>内连接</td>
+<td>matched pairs</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>左外连接</td>
+<td>matched pairs</td>
+<td>unmatched left tuples</td>
+<td></td>
+</tr>
+<tr>
+<td>右外连接</td>
+<td>matched pairs</td>
+<td></td>
+<td>unmatched right tuples</td>
+</tr>
+<tr>
+<td>全外连接</td>
+<td>matched pairs</td>
+<td>unmatched left tuples</td>
+<td>unmatched right tuples</td>
+</tr>
+</tbody>
+</table>
+<p>观察左外连接与内连接，我们可以知道，左外连接比内连接多出了B部分。就是不满足连接条件的，左表中的元组。</p>
+<p>假设一个左连接执行后，它的结果等同于一个内连接，那么它就是可以转换为内连接的。</p>
+<p>但是这种转换是有条件的，条件是：保证最后的结果集中不会B部分的元组（这样的条件称为“reject-NULL”条件，即<strong>空值拒绝</strong>）。</p>
+<p>右外连接和全外连接也可以转化为内连击，转化的条件同理，也是要满足<strong>空值拒绝</strong>。</p>
+<h4 id="空值拒绝"><a href="#空值拒绝" class="headerlink" title="空值拒绝"></a>空值拒绝</h4><p>前面提到，外连接转换为内连接的条件是：WHERE 字句中与内表相关的条件满足“空值拒绝”（reject-NULL条件）。那么条件怎么才算是满足空值拒绝呢？一般认为满足一下任何一种情况是，即满足空值拒绝：</p>
+<ol>
+<li>条件可以保证从结果中排除外连接的右侧（右表）生成的值为NULL的行（即条件确保应用在右表带有空值的列对象是，条件不满足），所以能使该查询在语义上等效于内连接。</li>
+<li>外连接的提供空值的一侧为另一侧的每行只返回一行。如果该条件为真，则不存在提供控制的行。</li>
+</ol>
+<h4 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h4><p>初始数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> X (X_num <span class="built_in">int</span>, <span class="keyword">name</span> <span class="built_in">varchar</span>(<span class="number">10</span>));</div><div class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> Y (Y_num <span class="built_in">int</span>, <span class="keyword">name</span> <span class="built_in">varchar</span>(<span class="number">10</span>));</div><div class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> X <span class="keyword">VALUES</span>(<span class="number">1</span>, <span class="string">'X_1'</span>);</div><div class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> X <span class="keyword">VALUES</span>(<span class="number">2</span>, <span class="string">'X_2'</span>);</div><div class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> X <span class="keyword">VALUES</span>(<span class="literal">NULL</span>, <span class="string">'X_3'</span>);</div><div class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> Y <span class="keyword">VALUES</span>(<span class="number">1</span>, <span class="string">'Y_1'</span>);</div><div class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> Y <span class="keyword">VALUES</span>(<span class="literal">NULL</span>, <span class="string">'Y_2'</span>);</div><div class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> Y <span class="keyword">VALUES</span>(<span class="number">3</span>, <span class="string">'Y_3'</span>);</div></pre></td></tr></table></figure>
+<p>我们来分析下面两条查询语句：</p>
+<p>语句一：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span>  * <span class="keyword">FROM</span> X <span class="keyword">LEFT</span> <span class="keyword">JOIN</span> Y <span class="keyword">ON</span> (X.X_num = Y.Y_num);</div></pre></td></tr></table></figure>
+<p>只有连接条件<code>X.X_num = Y.Y_num</code> ，没有WHERE条件，没有被优化。</p>
+<p>语句二：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> X <span class="keyword">LEFT</span> <span class="keyword">JOIN</span> Y <span class="keyword">ON</span> (X.X_num=Y.Y_num) <span class="keyword">WHERE</span> Y.Y_num <span class="keyword">is</span> <span class="keyword">NOT</span> <span class="literal">NULL</span>;</div></pre></td></tr></table></figure>
+<p>语句二包含<code>Y.Y_num is NOT NULL</code> ,的条件，则Y被选中的列为NULL的元组不会出现在最终结果集中。满足空值拒绝的条件。因此这个左外连接会被优化成内连接。</p>
+<h3 id="等价谓词重写"><a href="#等价谓词重写" class="headerlink" title="等价谓词重写"></a>等价谓词重写</h3><p>在数据库执行引擎中，一部分谓词的执行效率要高于另外的谓词。因此等价谓词重写也是一种有效的查询优化方式。</p>
+<h4 id="LIKE-规则"><a href="#LIKE-规则" class="headerlink" title="LIKE 规则"></a>LIKE 规则</h4><p>LIKE谓词是SQL标准支持的一种模式匹配操作。针对LIKE规则的优化如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">name LIKE 'abc%'</div></pre></td></tr></table></figure>
+<p>重写为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">name &gt;= 'abc' AND name &lt; 'abd'</div></pre></td></tr></table></figure>
+<p>这样转换的好处是：LIKE规则只能进行全表扫描，转换后若name列上存在索引，则可以利用索引进行扫描。</p>
+<h4 id="BEWEEN-AND-规则"><a href="#BEWEEN-AND-规则" class="headerlink" title="BEWEEN-AND 规则"></a>BEWEEN-AND 规则</h4><p>BETWEEN-AND规则的优化与LIKE类似：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">id BETWEEN 10 AND 20</div></pre></td></tr></table></figure>
+<p>重写为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">id &gt;= 10 AND id &lt;= 20</div></pre></td></tr></table></figure>
+<p>可以利用索引扫描。</p>
+<h4 id="IN-转换-OR-规则"><a href="#IN-转换-OR-规则" class="headerlink" title="IN 转换 OR 规则"></a>IN 转换 OR 规则</h4><p>IN只是IN操作符操作，不是IN子查询。将IN谓词等价重写为若干个OR 谓词，可能提高执行效率。如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">age IN (8, 12, 21)</div></pre></td></tr></table></figure>
+<p>重写为：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">age = 8 OR age = 12 OR age = 21</div></pre></td></tr></table></figure>
+<p>应用IN转换OR规则后，效率能否提高，主要取决于数据库是否只对IN操作符支持全表扫描。</p>
+<h3 id="子查询优化"><a href="#子查询优化" class="headerlink" title="子查询优化"></a>子查询优化</h3><h4 id="子查询合并"><a href="#子查询合并" class="headerlink" title="子查询合并"></a>子查询合并</h4><p>当多个子查询产生同样的结果集，就可以把多个子查询合并成一个子查询（合并后仍是一个子查询，但可以通过其他方式消除子查询）。如</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t1 <span class="keyword">WHERE</span> a1&lt;<span class="number">10</span> <span class="keyword">AND</span> (</div><div class="line"><span class="keyword">EXISTS</span> (<span class="keyword">SELECT</span> a2 <span class="keyword">FROM</span> t2 <span class="keyword">WHERE</span> t2.a2&lt;<span class="number">5</span> <span class="keyword">AND</span> t2.b2=<span class="number">1</span>) <span class="keyword">OR</span></div><div class="line"><span class="keyword">EXISTS</span> (<span class="keyword">SELECT</span> a2 <span class="keyword">FROM</span> t2 <span class="keyword">WHERE</span> t2.a2&lt; <span class="keyword">AND</span> t2.b2=<span class="number">2</span>)</div><div class="line">)</div></pre></td></tr></table></figure>
+<p>可以优化为：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t1 <span class="keyword">WHERE</span> t2.a2&lt;<span class="number">5</span> <span class="keyword">AND</span> (t2.b2=<span class="number">1</span> <span class="keyword">OR</span> t2.b2=<span class="number">2</span>)</div></pre></td></tr></table></figure>
+<h4 id="子查询展开"><a href="#子查询展开" class="headerlink" title="子查询展开"></a>子查询展开</h4><p>子查询展开，又称子查询反嵌套或子查询上拉。把一些在内层的子查询拉出来，置于外层的父查询中，作为连接关系与外层父查询并列，本质是把某些<strong>子查询重写为等价的多表连接操作</strong>。这样的好处是<strong>有关连接方法，连接顺序的逻辑优化手段都可以得到应用</strong>。优化的例子如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t1,(<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t2 <span class="keyword">WHERE</span> t2.a2&gt;<span class="number">10</span>)v_t2 <span class="keyword">WHERE</span> t1.a1 &lt; <span class="number">10</span> <span class="keyword">AND</span> v_t2.a2&lt;<span class="number">20</span></div></pre></td></tr></table></figure>
+<p>可以优化为：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t1,t2 <span class="keyword">WHERE</span> t2.a2&gt;<span class="number">10</span> <span class="keyword">AND</span> t1.a1&lt;<span class="number">10</span> <span class="keyword">AND</span> t2.a2&lt;<span class="number">20</span></div></pre></td></tr></table></figure>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p> <a href="https://book.douban.com/subject/25815707/" title="《数据库查询优化器的艺术》" target="_blank" rel="external">《数据库查询优化器的艺术》</a>  </p>
+<p> <a href="https://book.douban.com/subject/25815707/" title="《数据库系统实现》 " target="_blank" rel="external">《数据库系统实现》 </a>  </p>
+<p> <a href="https://book.douban.com/subject/1929984/" title="《数据库系统概念》 第五版" target="_blank" rel="external">《数据库系统概念》 第五版</a>  </p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+
+	
+<div>
+  
+    ﻿
+<div style="text-align:center;color: #ccc;font-size:14px;">
+------ 本文结束 ------</div>
+<br/>
+<div style="border: 1px solid black">
+<div style="margin-left:10px">
+<span style="font-weight:blod">版权声明</span>
+
+<br/>
+本文由<b>邱振源</b>创作，
+首发于<a href="https://qiuzhenyuan.github.io" style="color:#258FC6">邱振源的技术博客</a> 。转载请注明<b>作者</b>及<b>出处</b>。</p>
+</div>
+</div>
+
+
+
+
+  
+</div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/查询优化/" rel="tag"># 查询优化</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/15/深入理解查询优化-基本原理/" rel="next" title="深入理解查询优化 | 基本概念">
+                <i class="fa fa-chevron-left"></i> 深入理解查询优化 | 基本概念
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/03/几道动态规划题/" rel="prev" title="几道动态规划题">
+                几道动态规划题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <p class="site-author-name" itemprop="name">Zhenyuan Qiu</p>
+            <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/qiuzhenyuan" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.linkedin.com/in/%E6%8C%AF%E6%BA%90-%E9%82%B1-a8771813b/" target="_blank" title="LinkedIn">
+                  
+                    <i class="fa fa-fw fa-globe"></i>LinkedIn</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本操作的优化"><span class="nav-number">2.</span> <span class="nav-text">基本操作的优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见逻辑优化"><span class="nav-number">3.</span> <span class="nav-text">常见逻辑优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#外连接消除"><span class="nav-number">3.1.</span> <span class="nav-text">外连接消除</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#什么时候可以消除外连接"><span class="nav-number">3.1.1.</span> <span class="nav-text">什么时候可以消除外连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#空值拒绝"><span class="nav-number">3.1.2.</span> <span class="nav-text">空值拒绝</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#例子"><span class="nav-number">3.1.3.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#等价谓词重写"><span class="nav-number">3.2.</span> <span class="nav-text">等价谓词重写</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LIKE-规则"><span class="nav-number">3.2.1.</span> <span class="nav-text">LIKE 规则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BEWEEN-AND-规则"><span class="nav-number">3.2.2.</span> <span class="nav-text">BEWEEN-AND 规则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IN-转换-OR-规则"><span class="nav-number">3.2.3.</span> <span class="nav-text">IN 转换 OR 规则</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#子查询优化"><span class="nav-number">3.3.</span> <span class="nav-text">子查询优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#子查询合并"><span class="nav-number">3.3.1.</span> <span class="nav-text">子查询合并</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#子查询展开"><span class="nav-number">3.3.2.</span> <span class="nav-text">子查询展开</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+<div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhenyuan Qiu</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by  <a class="theme-link" href="https://hexo.io">Hexo</a> </div>
+
+  <span class="post-meta-divider">|</span>
+
+
+<span id="busuanzi_container_site_pv">
+    博客总访问量：<span id="busuanzi_value_site_pv"></span>次
+</span>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+	
+
+</body>
+</html>
