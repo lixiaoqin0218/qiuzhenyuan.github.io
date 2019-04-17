@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="源码,Go," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="context是什么context 是go1.7引入标准包的接口context接口需要实现4个方法： 1234567891011121314type Context interface &amp;#123;    // Deadline 返回time.Time 作为context的截止时间,或者说是context应该被cancel的时间    // 如果没有设置deadline或者没有deadline,">
+<meta name="keywords" content="源码,Go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang context源码分析">
+<meta property="og:url" content="http://yoursite.com/2019/04/18/golang-context源码分析/index.html">
+<meta property="og:site_name" content="邱振源的博客">
+<meta property="og:description" content="context是什么context 是go1.7引入标准包的接口context接口需要实现4个方法： 1234567891011121314type Context interface &amp;#123;    // Deadline 返回time.Time 作为context的截止时间,或者说是context应该被cancel的时间    // 如果没有设置deadline或者没有deadline,">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-04-17T18:34:28.699Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="golang context源码分析">
+<meta name="twitter:description" content="context是什么context 是go1.7引入标准包的接口context接口需要实现4个方法： 1234567891011121314type Context interface &amp;#123;    // Deadline 返回time.Time 作为context的截止时间,或者说是context应该被cancel的时间    // 如果没有设置deadline或者没有deadline,">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/04/18/golang-context源码分析/"/>
+
+
+
+
+
+  <title>golang context源码分析 | 邱振源的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">邱振源的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/18/golang-context源码分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zhenyuan Qiu">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="邱振源的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">golang context源码分析</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-18T02:28:37+08:00">
+                2019-04-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+		  
+          
+		  
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="context是什么"><a href="#context是什么" class="headerlink" title="context是什么"></a>context是什么</h2><p>context 是go1.7引入标准包的接口<br>context接口需要实现4个方法：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Context <span class="keyword">interface</span> &#123;</div><div class="line">    <span class="comment">// Deadline 返回time.Time 作为context的截止时间,或者说是context应该被cancel的时间</span></div><div class="line">    <span class="comment">// 如果没有设置deadline或者没有deadline, Deadline 返回 ok==false </span></div><div class="line">    Deadline() (deadline time.Time, ok <span class="keyword">bool</span>)</div><div class="line"></div><div class="line">    Done() &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</div><div class="line"></div><div class="line">    Err() error</div><div class="line"></div><div class="line">    <span class="comment">// Value returns the value associated with this context for key, or nil</span></div><div class="line">    <span class="comment">// if no value is associated with key. Successive calls to Value with</span></div><div class="line">    <span class="comment">// the same key returns the same result.</span></div><div class="line">    Value(key <span class="keyword">interface</span>&#123;&#125;) <span class="keyword">interface</span>&#123;&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<a id="more"></a>  
+<p>分别解析一下这context接口的4个方法：</p>
+<p><strong>Deadline()</strong><br>返回 time.Time 和 ok。如果没有设置deadline, ok=false,否则ok=true。 time.Time返回的是过期时间。</p>
+<p><strong>Done()</strong><br>当代表此上下文完成的工作应该被取消时，Done会返回一个已关闭的频道;如果永远不能取消此上下文，则<code>Done()</code>可能返回nil。<br><code>WithCancel()</code>安排在<code>Cancel()</code>方法被调用时返回关闭的channel;<br><code>WithDeadline()</code>安排在deadline到时返回关闭到channel;<br><code>WithTimeout()</code>安排在超时时返回关闭的channel。</p>
+<p>一般Done()方法是这样使用的：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Stream</span><span class="params">(ctx context.Context, out <span class="keyword">chan</span>&lt;- Value)</span> <span class="title">error</span></span> &#123;</div><div class="line">    <span class="keyword">for</span> &#123;</div><div class="line">        v, err := DoSomething(ctx)</div><div class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">            <span class="keyword">return</span> err</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">select</span> &#123;</div><div class="line">        <span class="keyword">case</span> &lt;-ctx.Done(): <span class="comment">//ctx未超时，或者cancel未被调用时，Done()方法返回nil, case不会执行</span></div><div class="line">            <span class="keyword">return</span> ctx.Err()</div><div class="line">        <span class="keyword">case</span> out &lt;- v:</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p>Done()返回只读channel。在goroutine中，使用select调用&lt;-ctx.Done()判断是否要结束，如果接受到值的话，就可以返回结束goroutine了；如果接收不到，就会继续进行监控。</p>
+<p><strong>Err()</strong><br>当context的<code>Done()</code>方法未被调用时，<code>Err()</code>返回nil,当<code>Done()</code>被调用，返回具体原因。</p>
+<p><strong>Value()</strong><br><code>Value()</code>方法返回context中与key相关联的value。</p>
+<h2 id="context有什么用"><a href="#context有什么用" class="headerlink" title="context有什么用"></a>context有什么用</h2><p>摘抄一段 src/context/context.go的注释</p>
+<blockquote>
+<p>// Incoming requests to a server should create a Context, and outgoing<br>// calls to servers should accept a Context. The chain of function<br>// calls between them must propagate the Context, optionally replacing<br>// it with a derived Context created using WithCancel, WithDeadline,<br>// WithTimeout, or WithValue. When a Context is canceled, all<br>// Contexts derived from it are also canceled.</p>
+</blockquote>
+<p>一个请求进入服务端，应该创建一个context。对外提供服务的服务端，应该接收一个context。它们之间的调用应该传播context,有需要可以用 <code>WithCancel()</code>,<code>WithDeadline()</code>,<code>WithTimeout()</code>方法创建派生的context。当一个context被取消，由它派生的context都会被取消</p>
+<h2 id="使用context的规范"><a href="#使用context的规范" class="headerlink" title="使用context的规范"></a>使用context的规范</h2><blockquote>
+<p>// Programs that use Contexts should follow these rules to keep interfaces<br>// consistent across packages and enable static analysis tools to check context<br>// propagation:<br>//<br>// Do not store Contexts inside a struct type; instead, pass a Context<br>// explicitly to each function that needs it. The Context should be the first<br>// parameter, typically named ctx:<br>//<br>// func DoSomething(ctx context.Context, arg Arg) error {<br>//      // … use ctx …<br>// }<br>//<br>// Do not pass a nil Context, even if a function permits it. Pass context.TODO<br>// if you are unsure about which Context to use.<br>//<br>// Use context Values only for request-scoped data that transits processes and<br>// APIs, not for passing optional parameters to functions.</p>
+</blockquote>
+<ol>
+<li>不要把context存在结构体中, 而应该把它作为函数的首个参数。</li>
+<li>不要传递 nil Context。</li>
+<li>context 应该只用来传递请求域的参数，不应该用来保存函数的可选参数。</li>
+</ol>
+<h2 id="源码中实现的几种context"><a href="#源码中实现的几种context" class="headerlink" title="源码中实现的几种context"></a>源码中实现的几种context</h2><p>context有三种, emptyCtx, cancelCtx,timerCtx和 valueContext</p>
+<h3 id="emptyCtx"><a href="#emptyCtx" class="headerlink" title="emptyCtx"></a>emptyCtx</h3><p>emptyCtx实际上是int类型，实现了 context接口的4个方法，但是没有任何逻辑。emptyCtx不会被取消，所以Err()方法返回nil</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> emptyCtx <span class="keyword">int</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(*emptyCtx)</span> <span class="title">Deadline</span><span class="params">()</span> <span class="params">(deadline time.Time, ok <span class="keyword">bool</span>)</span></span> &#123;</div><div class="line">    <span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(*emptyCtx)</span> <span class="title">Done</span><span class="params">()</span> &lt;-<span class="title">chan</span> <span class="title">struct</span></span>&#123;&#125; &#123;</div><div class="line">    <span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(*emptyCtx)</span> <span class="title">Err</span><span class="params">()</span> <span class="title">error</span></span> &#123;</div><div class="line">    <span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(*emptyCtx)</span> <span class="title">Value</span><span class="params">(key <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">interface</span></span>&#123;&#125; &#123;</div><div class="line">    <span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>Background()</code>方法和<code>TODO()</code>方法返回的就是emptyCtx类型的context,两个函数返回的context本质上是一样的，都是不可取消，没有过期时间，一般作为context树的顶层。他们的区别是<code>Background()</code>一般位于main函数中，初始化的时候或者在 tests中，在request进入的时候生成；而<code>TODO()</code>一般是不清楚使用什么context时，使用的    。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> (</div><div class="line">    background = <span class="built_in">new</span>(emptyCtx)</div><div class="line">    todo       = <span class="built_in">new</span>(emptyCtx)</div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Background</span><span class="params">()</span> <span class="title">Context</span></span> &#123;</div><div class="line">    <span class="keyword">return</span> background</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">TODO</span><span class="params">()</span> <span class="title">Context</span></span> &#123;</div><div class="line">    <span class="keyword">return</span> todo</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="cancelCtx"><a href="#cancelCtx" class="headerlink" title="cancelCtx"></a>cancelCtx</h3><p>调用 <code>WithCancel（）</code>返回一个cancelCtx以及一个CancelFunc,cancelCtx以及创建cancelCtx源码如下:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> cancelCtx <span class="keyword">struct</span> &#123;</div><div class="line">    Context</div><div class="line"></div><div class="line">    mu       sync.Mutex            <span class="comment">// protects following fields</span></div><div class="line">    done     <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;         <span class="comment">// created lazily, closed by first cancel call</span></div><div class="line">    children <span class="keyword">map</span>[canceler]<span class="keyword">struct</span>&#123;&#125; <span class="comment">// set to nil by the first cancel call</span></div><div class="line">    err      error                 <span class="comment">// set to non-nil by the first cancel call</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithCancel</span><span class="params">(parent Context)</span> <span class="params">(ctx Context, cancel CancelFunc)</span></span> &#123;</div><div class="line">    c := newCancelCtx(parent)</div><div class="line">    propagateCancel(parent, &amp;c) <span class="comment">//传入父context，以及子 contxt的地址</span></div><div class="line">    <span class="keyword">return</span> &amp;c, <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; c.cancel(<span class="literal">true</span>, Canceled) &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// newCancelCtx returns an initialized cancelCtx.</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">newCancelCtx</span><span class="params">(parent Context)</span> <span class="title">cancelCtx</span></span> &#123;</div><div class="line">    <span class="keyword">return</span> cancelCtx&#123;Context: parent&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里的主要流程是:</p>
+<ol>
+<li><code>newCancelCtx()</code> 传入一个context，作为新context的parent。</li>
+<li><code>propagateCancel()</code> 绑定context与其 parentContext的关系，把context加入parent的context数组中。当parent被取消，context也会被取消。</li>
+<li>返回该context以及其 cancelFunc。</li>
+</ol>
+<p>然后我们来看看<code>propagateCancel()</code>的源码:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">propagateCancel</span><span class="params">(parent Context, child canceler)</span></span> &#123;</div><div class="line">    <span class="keyword">if</span> parent.Done() == <span class="literal">nil</span> &#123;</div><div class="line">        <span class="keyword">return</span> <span class="comment">// parent is never canceled</span></div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> p, ok := parentCancelCtx(parent); ok &#123;</div><div class="line">        <span class="comment">//找到了 cancelCtx类型的 context</span></div><div class="line">        p.mu.Lock()</div><div class="line">        <span class="keyword">if</span> p.err != <span class="literal">nil</span> &#123;</div><div class="line">            <span class="comment">// parent 已经被取消，则把传入的child也取消</span></div><div class="line">            child.cancel(<span class="literal">false</span>, p.err)</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="comment">// parent 未被取消，把child放入 parent的children数组中</span></div><div class="line">        <span class="keyword">if</span> p.children == <span class="literal">nil</span> &#123;</div><div class="line">            p.children = <span class="built_in">make</span>(<span class="keyword">map</span>[canceler]<span class="keyword">struct</span>&#123;&#125;)</div><div class="line">        &#125;</div><div class="line">            p.children[child] = <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</div><div class="line">        &#125;</div><div class="line">        p.mu.Unlock()</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">//开启一个goroutine,当parent取消时 child调用cancel</span></div><div class="line">        <span class="comment">//如果没有找到最近的可以被cancel的parent，即其上都不可被cancel，则启动一个goroutine等待传入的parent终止</span></div><div class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">        <span class="keyword">select</span> &#123;</div><div class="line">            <span class="keyword">case</span> &lt;-parent.Done():</div><div class="line">                child.cancel(<span class="literal">false</span>, parent.Err())</div><div class="line">            <span class="keyword">case</span> &lt;-child.Done():</div><div class="line">            &#125;</div><div class="line">        &#125;()</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看到<code>parentCancelCtx()</code>的主要作用是向上查找parent context中的cancelCtx,返回找到的第一个cancelCtx。</p>
+<p>首先我们注意到参数里有 canceler类型，canceler是一个接口。源码如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// A canceler is a context type that can be canceled directly. The</span></div><div class="line"><span class="comment">// implementations are *cancelCtx and *timerCtx.</span></div><div class="line"><span class="keyword">type</span> canceler <span class="keyword">interface</span> &#123;</div><div class="line">    cancel(removeFromParent <span class="keyword">bool</span>, err error)</div><div class="line">    Done() &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>cancler在源码中有两个实现，分别是 cancelCtx和timerCtx。</p>
+<p>然后看看<code>parentCancelCtx()</code>这个方法,传入一个parent context, 会一直沿着引用，找到一个cancelCtx</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// parentCancelCtx follows a chain of parent references until it finds a</span></div><div class="line"><span class="comment">// *cancelCtx. This function understands how each of the concrete types in this</span></div><div class="line"><span class="comment">// package represents its parent.</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">parentCancelCtx</span><span class="params">(parent Context)</span> <span class="params">(*cancelCtx, <span class="keyword">bool</span>)</span></span> &#123;</div><div class="line">    <span class="keyword">for</span> &#123;</div><div class="line">        <span class="keyword">switch</span> c := parent.(<span class="keyword">type</span>) &#123;</div><div class="line">        <span class="keyword">case</span> *cancelCtx:</div><div class="line">            <span class="keyword">return</span> c, <span class="literal">true</span></div><div class="line">        <span class="keyword">case</span> *timerCtx:</div><div class="line">            <span class="keyword">return</span> &amp;c.cancelCtx, <span class="literal">true</span></div><div class="line">        <span class="keyword">case</span> *valueCtx:</div><div class="line">            parent = c.Context</div><div class="line">        <span class="keyword">default</span>:</div><div class="line">            <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>回到<code>propagateCancel()</code>这个方法</p>
+<p>我们再看看cancelCtx的 <code>cancel()</code>方法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// cancel closes c.done, cancels each of c's children, and, if</span></div><div class="line"><span class="comment">// removeFromParent is true, removes c from its parent's children.</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *cancelCtx)</span> <span class="title">cancel</span><span class="params">(removeFromParent <span class="keyword">bool</span>, err error)</span></span> &#123;</div><div class="line">    <span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</div><div class="line">        <span class="built_in">panic</span>(<span class="string">"context: internal error: missing cancel error"</span>)</div><div class="line">    &#125;</div><div class="line">    c.mu.Lock()</div><div class="line">    <span class="keyword">if</span> c.err != <span class="literal">nil</span> &#123;</div><div class="line">        c.mu.Unlock()</div><div class="line">        <span class="keyword">return</span> <span class="comment">// 已经被取消</span></div><div class="line">    &#125;</div><div class="line">    c.err = err</div><div class="line">    <span class="keyword">if</span> c.done == <span class="literal">nil</span> &#123;</div><div class="line">        c.done = closedchan</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="built_in">close</span>(c.done)</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> child := <span class="keyword">range</span> c.children &#123; <span class="comment">//取消子context</span></div><div class="line">        <span class="comment">// <span class="doctag">NOTE:</span> acquiring the child's lock while holding parent's lock.</span></div><div class="line">        child.cancel(<span class="literal">false</span>, err)</div><div class="line">    &#125;</div><div class="line">    c.children = <span class="literal">nil</span></div><div class="line">    c.mu.Unlock()</div><div class="line"></div><div class="line">    <span class="keyword">if</span> removeFromParent &#123;</div><div class="line">        removeChild(c.Context, c)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="timerCtx"><a href="#timerCtx" class="headerlink" title="timerCtx"></a>timerCtx</h3><p>timerCtx的源码如下,使用WithTimeout方法可以创建一个timerCtx,传入一个context，作为父context,传入deadline作为context的截止时间:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> timerCtx <span class="keyword">struct</span> &#123;</div><div class="line">    <span class="comment">//继承自 cancleCtx，在外层包装一个timer,以及deadline</span></div><div class="line">    cancelCtx <span class="comment">//timerCtx 相当于一个cancelCtx的子context</span></div><div class="line">    timer *time.Timer</div><div class="line">    deadline time.Time</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithTimeout</span><span class="params">(parent Context, timeout time.Duration)</span> <span class="params">(Context, CancelFunc)</span></span> &#123;</div><div class="line">    <span class="keyword">return</span> WithDeadline(parent, time.Now().Add(timeout))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看到timerCtx是由 <code>WithDeadline()</code>创建的。我们可以看看这个函数的源码</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithDeadline</span><span class="params">(parent Context, d time.Time)</span> <span class="params">(Context, CancelFunc)</span></span> &#123;</div><div class="line">    <span class="keyword">if</span> cur, ok := parent.Deadline(); ok &amp;&amp; cur.Before(d) &#123;</div><div class="line">        <span class="comment">//父context的deadline早于d，则不设置deadline,返回一个 cancel context</span></div><div class="line">        <span class="keyword">return</span> WithCancel(parent)</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//新建一个 context，并且设置deadline</span></div><div class="line">    c := &amp;timerCtx&#123;</div><div class="line">        cancelCtx: newCancelCtx(parent),</div><div class="line">        deadline:  d,</div><div class="line">    &#125;</div><div class="line">    propagateCancel(parent, c) <span class="comment">//当parent context结束时，让children context结束</span></div><div class="line">    dur := time.Until(d)</div><div class="line">    <span class="keyword">if</span> dur &lt;= <span class="number">0</span> &#123;</div><div class="line">        c.cancel(<span class="literal">true</span>, DeadlineExceeded) <span class="comment">// 设置的deadline 已经到期，调用cancel方法</span></div><div class="line">        <span class="keyword">return</span> c, <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; c.cancel(<span class="literal">true</span>, Canceled) &#125;</div><div class="line">    &#125;</div><div class="line">    c.mu.Lock()</div><div class="line">    <span class="keyword">defer</span> c.mu.Unlock()</div><div class="line">    <span class="keyword">if</span> c.err == <span class="literal">nil</span> &#123;</div><div class="line">        <span class="comment">//返回一个timer，在dur时间后，执行cancel函数</span></div><div class="line">        c.timer = time.AfterFunc(dur, <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">        c.cancel(<span class="literal">true</span>, DeadlineExceeded)</div><div class="line">    &#125;)</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> c, <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; c.cancel(<span class="literal">true</span>, Canceled) &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *timerCtx)</span> <span class="title">cancel</span><span class="params">(removeFromParent <span class="keyword">bool</span>, err error)</span></span> &#123;</div><div class="line">    c.cancelCtx.cancel(<span class="literal">false</span>, err)  <span class="comment">//调用父context cancelCtx的cancel方法</span></div><div class="line">    <span class="keyword">if</span> removeFromParent &#123;</div><div class="line">        removeChild(c.cancelCtx.Context, c) <span class="comment">//移除c 这个子context</span></div><div class="line">    &#125;</div><div class="line">    c.mu.Lock()</div><div class="line">    <span class="keyword">if</span> c.timer != <span class="literal">nil</span> &#123;</div><div class="line">        c.timer.Stop()</div><div class="line">        c.timer = <span class="literal">nil</span></div><div class="line">    &#125;</div><div class="line">    c.mu.Unlock()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="valueCtx"><a href="#valueCtx" class="headerlink" title="valueCtx"></a>valueCtx</h3><p>valueCtx带有一对 interface格式的键值对</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">type</span> valueCtx <span class="keyword">struct</span> &#123;</div><div class="line">    Context</div><div class="line">    key, val <span class="keyword">interface</span>&#123;&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithValue</span><span class="params">(parent Context, key, val <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">Context</span></span> &#123;</div><div class="line">    <span class="keyword">if</span> key == <span class="literal">nil</span> &#123;</div><div class="line">        <span class="built_in">panic</span>(<span class="string">"nil key"</span>)</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> !reflect.TypeOf(key).Comparable() &#123;</div><div class="line">        <span class="built_in">panic</span>(<span class="string">"key is not comparable"</span>)</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> &amp;valueCtx&#123;parent, key, val&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+
+	
+<div>
+  
+    ﻿
+<div style="text-align:center;color: #ccc;font-size:14px;">
+------ 本文结束 ------</div>
+<br/>
+<div style="border: 1px solid black">
+<div style="margin-left:10px">
+<span style="font-weight:blod">版权声明</span>
+
+<br/>
+本文由<b>邱振源</b>创作，
+首发于<a href="https://qiuzhenyuan.github.io" style="color:#258FC6">邱振源的技术博客</a> 。转载请注明<b>作者</b>及<b>出处</b>。</p>
+</div>
+</div>
+
+
+
+
+  
+</div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/源码/" rel="tag"># 源码</a>
+          
+            <a href="/tags/Go/" rel="tag"># Go</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/03/磁盘那些事（上）/" rel="next" title="关于磁盘的一些概念">
+                <i class="fa fa-chevron-left"></i> 关于磁盘的一些概念
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <p class="site-author-name" itemprop="name">Zhenyuan Qiu</p>
+            <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/qiuzhenyuan" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.linkedin.com/in/%E6%8C%AF%E6%BA%90-%E9%82%B1-a8771813b/" target="_blank" title="LinkedIn">
+                  
+                    <i class="fa fa-fw fa-globe"></i>LinkedIn</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#context是什么"><span class="nav-number">1.</span> <span class="nav-text">context是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#context有什么用"><span class="nav-number">2.</span> <span class="nav-text">context有什么用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用context的规范"><span class="nav-number">3.</span> <span class="nav-text">使用context的规范</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码中实现的几种context"><span class="nav-number">4.</span> <span class="nav-text">源码中实现的几种context</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#emptyCtx"><span class="nav-number">4.1.</span> <span class="nav-text">emptyCtx</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cancelCtx"><span class="nav-number">4.2.</span> <span class="nav-text">cancelCtx</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#timerCtx"><span class="nav-number">4.3.</span> <span class="nav-text">timerCtx</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#valueCtx"><span class="nav-number">4.4.</span> <span class="nav-text">valueCtx</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+<div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhenyuan Qiu</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by  <a class="theme-link" href="https://hexo.io">Hexo</a> </div>
+
+  <span class="post-meta-divider">|</span>
+
+
+<span id="busuanzi_container_site_pv">
+    博客总访问量：<span id="busuanzi_value_site_pv"></span>次
+</span>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+	
+
+</body>
+</html>
